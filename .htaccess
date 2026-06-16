@@ -1,0 +1,126 @@
+# M2 Bygg Team AB — Apache .htaccess
+# Place in public_html/ root
+
+Options -Indexes
+ServerSignature Off
+
+# ── CHARACTER SET ─────────────────────────────────────────────
+AddDefaultCharset UTF-8
+
+# ── HTTPS REDIRECT ────────────────────────────────────────────
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ── WWW → non-www (choose one direction and stick to it) ──────
+# Non-www canonical:
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+# ── CLEAN URL REWRITING ───────────────────────────────────────
+# Maps /path → /path.php (PHP pages without extension)
+# Maps /path → /path/index.php (directory index pages)
+
+# Don't rewrite real files or directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Try /path.php
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L]
+
+# Try /path/index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}/index.php -f
+RewriteRule ^(.+?)/?$ $1/index.php [L]
+
+# ── SERVICE SUBDIRECTORY ROUTING ──────────────────────────────
+# /tjanster/takbyte → /tjanster/takbyte.php (if file exists)
+# Already handled by the rule above.
+
+# ── TRAILING SLASH NORMALISATION ─────────────────────────────
+# Remove trailing slash (except root)
+RewriteCond %{REQUEST_URI} !^/$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ /$1 [R=301,L]
+
+# ── GZIP COMPRESSION ─────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE \
+    text/html text/plain text/css text/xml text/javascript \
+    application/javascript application/json application/xml \
+    image/svg+xml font/woff font/woff2
+</IfModule>
+
+# ── BROWSER CACHING ───────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html                 "access plus 1 hour"
+  ExpiresByType text/css                  "access plus 1 month"
+  ExpiresByType application/javascript    "access plus 1 month"
+  ExpiresByType image/jpeg                "access plus 6 months"
+  ExpiresByType image/png                 "access plus 6 months"
+  ExpiresByType image/webp                "access plus 6 months"
+  ExpiresByType image/svg+xml             "access plus 6 months"
+  ExpiresByType image/gif                 "access plus 6 months"
+  ExpiresByType font/woff                 "access plus 1 year"
+  ExpiresByType font/woff2                "access plus 1 year"
+  ExpiresByType application/pdf           "access plus 1 month"
+  ExpiresByType application/json          "access plus 0 seconds"
+</IfModule>
+
+# Cache-Control headers
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=2592000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2)$">
+    Header set Cache-Control "public, max-age=15552000"
+  </FilesMatch>
+  <FilesMatch "\.(html|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# ── SECURITY HEADERS ──────────────────────────────────────────
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-XSS-Protection "1; mode=block"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" env=HTTPS
+
+  # Remove server info
+  Header unset Server
+  Header unset X-Powered-By
+</IfModule>
+
+# ── BLOCK SENSITIVE FILES ─────────────────────────────────────
+<FilesMatch "^(composer\.json|composer\.lock|\.env|\.gitignore|package\.json|README\.md)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
+
+# Block direct access to /vendor and /send mailer.php
+<FilesMatch "^mailer\.php$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
+
+# ── CUSTOM ERROR PAGES ────────────────────────────────────────
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
+
+# ── PHP SETTINGS (cPanel shared hosting) ─────────────────────
+<IfModule mod_php.c>
+  php_value upload_max_filesize  10M
+  php_value post_max_size        12M
+  php_value max_execution_time   30
+  php_value memory_limit         256M
+  php_flag  display_errors       Off
+  php_flag  log_errors           On
+</IfModule>

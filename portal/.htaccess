@@ -1,0 +1,10 @@
+Options -Indexes
+php_flag display_errors Off
+
+# Redirect bare directory to index
+DirectoryIndex index.php
+
+# Block access to includes
+<FilesMatch "^(auth|layout)\.php$">
+    Require all denied
+</FilesMatch>

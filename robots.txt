@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /send/
+Disallow: /vendor/
+Disallow: /includes/
+
+Sitemap: https://www.m2team.se/sitemap.xml

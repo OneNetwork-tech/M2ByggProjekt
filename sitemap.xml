@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Core pages -->
+  <url><loc>https://www.m2team.se/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://www.m2team.se/tjanster</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.m2team.se/offert</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.m2team.se/kontakt</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/om-oss</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/projekt</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/prisguide</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/faq</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/blogg</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/bli-partner</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://www.m2team.se/integritetspolicy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <!-- Service sub-pages -->
+  <url><loc>https://www.m2team.se/tjanster/takbyte</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/takrenovering</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/takmalning</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/taktvatt</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/platarbeten</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/fasadmalning</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/fasadrenovering</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/fasadtvatt</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/markarbete</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/stenlaggning</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/tjanster/klottersanering</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- Blog articles -->
+  <url><loc>https://www.m2team.se/blogg/takbyte-kostnad</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/blogg/rot-avdrag-guide</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/blogg/fasadmalning-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/blogg/taktvatt-varfor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/blogg/fasadmalning-pris</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/blogg/tegeltak-vs-betongtak</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/blogg/hangrannor-guide</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <!-- Local SEO pages -->
+  <url><loc>https://www.m2team.se/goteborg</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.m2team.se/kungsbacka</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/molndal</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/kungalv</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.m2team.se/lerum</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/alingsas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/trollhattan</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/askim</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/hisingen</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://www.m2team.se/molnlycke</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>

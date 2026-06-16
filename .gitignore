@@ -1,0 +1,21 @@
+# ── Database (never commit live data) ──
+data/*.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm
+data/*.db
+
+# ── Secrets / local config ──
+.env
+config.local.php
+
+# ── OS / editor junk ──
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+*.swp
+
+# ── Uploads (user content stays on server) ──
+uploads/*
+!uploads/.gitkeep

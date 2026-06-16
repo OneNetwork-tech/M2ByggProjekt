@@ -1,0 +1,8 @@
+Options -Indexes
+php_flag display_errors Off
+
+DirectoryIndex index.php
+
+<FilesMatch "^(auth|layout)\.php$">
+    Require all denied
+</FilesMatch>
