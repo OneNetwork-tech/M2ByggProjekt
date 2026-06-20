@@ -37,7 +37,7 @@
       <div>
         <div class="footer__heading">Företaget</div>
         <ul>
-          <?php foreach([['Om oss','/om-oss'],['Projekt','/projekt'],['Prisguide 2025','/prisguide'],['Blogg & tips','/blogg'],['Vanliga frågor','/faq'],['Bli partner','/bli-partner'],['Integritetspolicy','/integritetspolicy']] as $l): ?>
+          <?php foreach([['Om oss','/om-oss'],['För fastigheter','/fastighet'],['Projekt','/projekt'],['Prisguide 2025','/prisguide'],['Blogg & tips','/blogg'],['Vanliga frågor','/faq'],['Bli partner','/bli-partner'],['Integritetspolicy','/integritetspolicy']] as $l): ?>
           <li><a href="<?= htmlspecialchars($l[1]) ?>"><?= htmlspecialchars($l[0]) ?></a></li>
           <?php endforeach; ?>
         </ul>

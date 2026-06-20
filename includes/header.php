@@ -100,6 +100,7 @@ function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
           </ul>
         </li>
         <li><a href="/om-oss" class="<?= $active_page==='om-oss'?'active':'' ?>">Så fungerar det</a></li>
+        <li><a href="/fastighet" class="<?= $active_page==='fastighet'?'active':'' ?>">För fastigheter</a></li>
         <li><a href="/projekt" class="<?= $active_page==='projekt'?'active':'' ?>">Projekt</a></li>
         <li><a href="/om-oss#om-oss" class="<?= $active_page==='om-oss'?'active':'' ?>">Om oss</a></li>
         <li><a href="/kontakt" class="<?= $active_page==='kontakt'?'active':'' ?>">Kontakt</a></li>
@@ -133,6 +134,7 @@ function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8')
       </ul>
     </li>
     <li><a href="/om-oss">Så fungerar det</a></li>
+    <li><a href="/fastighet">För fastigheter</a></li>
     <li><a href="/projekt">Projekt</a></li>
     <li><a href="/om-oss#om-oss">Om oss</a></li>
     <li><a href="/kontakt">Kontakt</a></li>
