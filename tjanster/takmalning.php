@@ -2,6 +2,7 @@
 $page_title = 'Takmålning Göteborg';
 $page_description = 'Professionell takmålning i Göteborg till fast pris. Förnyar och skyddar alla taktyper. ROT-avdrag. Gratis offert. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Takmålning Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

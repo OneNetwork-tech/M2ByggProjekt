@@ -1,8 +1,12 @@
-# ── Database (never commit live data) ──
+# ── Database & server-only data (never commit live data) ──
 data/*.sqlite
 data/*.sqlite-wal
 data/*.sqlite-shm
 data/*.db
+data/backups/*
+data/portal-uploads/*
+!data/backups/.gitkeep
+!data/portal-uploads/.gitkeep
 
 # ── Secrets / local config ──
 .env
@@ -16,6 +20,12 @@ Thumbs.db
 .vscode/
 *.swp
 
-# ── Uploads (user content stays on server) ──
-uploads/*
-!uploads/.gitkeep
+# ── Uploads ──
+# Static site-asset images (hero photos, etc.) committed at the top level of uploads/
+# ARE tracked — pages reference them directly. Only CRM-admin-uploaded content
+# (portfolio/service images added live via crm/portfolio.php, crm/tjanster.php)
+# is excluded, since that's live server data, not part of the codebase.
+uploads/portfolio/*
+uploads/services/*
+!uploads/portfolio/.gitkeep
+!uploads/services/.gitkeep

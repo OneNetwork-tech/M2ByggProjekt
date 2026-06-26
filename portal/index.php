@@ -38,13 +38,13 @@ $unreadMsgs = db()->prepare(
 $unreadMsgs->execute([$cid]);
 $unreadMsgs = (int)$unreadMsgs->fetchColumn();
 
-portal_head('Dashboard', $pu);
+portal_head(t('nav.dashboard'), $pu);
 portal_nav('/');
 ?>
 <main class="portal-main">
   <div class="portal-page-title">
-    <h1>Hej, <?= e(explode(' ', $pu['name'])[0]) ?>!</h1>
-    <p>Här är en översikt av dina pågående ärenden.</p>
+    <h1><?= e(sprintf(t('dash.greeting'), explode(' ', $pu['name'])[0])) ?></h1>
+    <p><?= e(t('dash.overview')) ?></p>
   </div>
 
   <!-- Stat cards -->
@@ -64,7 +64,7 @@ portal_nav('/');
       </div>
       <div>
         <div class="stat-card__val"><?= $pendingQuotes ?></div>
-        <div class="stat-card__lbl">Offerter att besvara</div>
+        <div class="stat-card__lbl"><?= e(t('dash.pending_quotes')) ?></div>
       </div>
     </div>
     <div class="stat-card">
@@ -73,7 +73,7 @@ portal_nav('/');
       </div>
       <div>
         <div class="stat-card__val"><?= number_format($unpaidTotal, 0, ',', ' ') ?> kr</div>
-        <div class="stat-card__lbl">Obetalt belopp</div>
+        <div class="stat-card__lbl"><?= e(t('dash.unpaid')) ?></div>
       </div>
     </div>
     <div class="stat-card">
@@ -82,7 +82,7 @@ portal_nav('/');
       </div>
       <div>
         <div class="stat-card__val"><?= $unreadMsgs ?></div>
-        <div class="stat-card__lbl">Olästa meddelanden</div>
+        <div class="stat-card__lbl"><?= e(t('dash.unread_messages')) ?></div>
       </div>
     </div>
   </div>

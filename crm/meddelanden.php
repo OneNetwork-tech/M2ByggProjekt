@@ -1,7 +1,8 @@
 <?php
-$crm_title = 'Kommunikation';
-$crm_page  = 'meddelanden';
-require_once __DIR__ . '/includes/crm-header.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/mailer.php';
+$me = require_login();
 $pdo = db();
 
 // mark notifications read
@@ -22,9 +23,27 @@ if ($view === 'portal') {
             // Mark customer messages in this thread as read
             $pdo->prepare("UPDATE portal_messages SET read_at=datetime('now','localtime') WHERE project_id=? AND sender_type='customer' AND read_at IS NULL")
                 ->execute([$pid]);
+
+            // Email the customer
+            $cs = $pdo->prepare("SELECT c.name, c.email FROM projects p JOIN customers c ON c.id=p.customer_id WHERE p.id=?");
+            $cs->execute([$pid]);
+            if (($cust = $cs->fetch()) && !empty($cust['email'])) {
+                crm_send_mail(
+                    $cust['email'], $cust['name'],
+                    'Nytt svar från M2 Bygg Team',
+                    '<p>Hej ' . htmlspecialchars($cust['name'], ENT_QUOTES, 'UTF-8') . '!</p><p>Du har fått ett nytt meddelande från M2 Bygg Team:</p><p style="background:#F3F4F6;padding:12px 16px;border-radius:8px">' . nl2br(htmlspecialchars($body, ENT_QUOTES, 'UTF-8')) . '</p>',
+                    'project', $pid,
+                    (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/portal/meddelanden.php?project=' . $pid,
+                    'Svara i portalen'
+                );
+            }
         }
         header("Location: meddelanden.php?view=portal&thread=$pid"); exit;
     }
+
+    $crm_title = 'Kommunikation';
+    $crm_page  = 'meddelanden';
+    require_once __DIR__ . '/includes/crm-header.php';
 
     // Threads: all projects that have portal messages
     $threads = $pdo->query("
@@ -143,6 +162,10 @@ if ($view === 'portal') {
 }
 
 // ── ACTIVITY FEED (default) ──────────────────────────────────────────────────
+$crm_title = 'Kommunikation';
+$crm_page  = 'meddelanden';
+require_once __DIR__ . '/includes/crm-header.php';
+
 $typeFilter = $_GET['type'] ?? 'all';
 $where = "1=1";
 if ($typeFilter !== 'all') $where = "t.type = " . $pdo->quote($typeFilter);

@@ -6,11 +6,14 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/m2team/public_html/
     # Sync everything except git/dev files. Keeps live database + uploads.
-    - /bin/cp -R 404.php bli-partner.php faq.php index.php integritetspolicy.php kontakt.php offert.php om-oss.php prisguide.php projekt.php $DEPLOYPATH
-    - /bin/cp -R .htaccess composer.json robots.txt sitemap.xml $DEPLOYPATH
-    - /bin/cp -R includes css js send vendor tjanster blogg crm $DEPLOYPATH
+    - /bin/cp -R 404.php 500.php bli-partner.php faq.php fastighet.php index.php integritetspolicy.php kontakt.php offert.php om-oss.php prisguide.php projekt.php sitemap.php $DEPLOYPATH
+    - /bin/cp -R .htaccess composer.json robots.txt $DEPLOYPATH
+    - /bin/cp -R includes css js assets lang send vendor tjanster blogg crm portal leverantor $DEPLOYPATH
     - /bin/cp -R goteborg kungsbacka molndal kungalv lerum alingsas trollhattan askim hisingen molnlycke $DEPLOYPATH
     # Data dir: create + protect, but NEVER overwrite the live SQLite database
-    - /bin/mkdir -p $DEPLOYPATH/data $DEPLOYPATH/uploads
+    - /bin/mkdir -p $DEPLOYPATH/data $DEPLOYPATH/uploads/portfolio $DEPLOYPATH/uploads/services
     - /bin/cp data/.htaccess $DEPLOYPATH/data/.htaccess
-    - /bin/chmod 755 $DEPLOYPATH/data $DEPLOYPATH/uploads
+    # Only sync the top-level static site-asset images — never touch portfolio/ or
+    # services/ subdirectories, since those hold live CRM-admin-uploaded content.
+    - /bin/find uploads -maxdepth 1 -type f -exec cp {} $DEPLOYPATH/uploads/ \;
+    - /bin/chmod 755 $DEPLOYPATH/data $DEPLOYPATH/uploads $DEPLOYPATH/uploads/portfolio $DEPLOYPATH/uploads/services

@@ -1,8 +1,26 @@
 <?php
+require_once __DIR__ . '/includes/i18n.php';
+require_once __DIR__ . '/crm/includes/db.php';
 $page_title       = 'M2 Bygg Team – Plattformen för bygg- och fastighetstjänster i Göteborg';
 $page_description = 'M2 är mer än ett byggbolag – en modern plattform som samordnar kvalitetssäkrade partners för tak, fasad, mark och mer. En kontaktpunkt. Tryggt och transparent. Göteborg & Västsverige.';
 $active_page      = 'hem';
+$breadcrumbs      = null; // homepage has no breadcrumb trail
+$lcp_image        = 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 require_once __DIR__ . '/includes/header.php';
+
+$siteReviews = db()->query("
+    SELECT r.*, c.name AS customer_name, c.city AS customer_city
+    FROM reviews r JOIN customers c ON c.id = r.customer_id
+    WHERE r.visible = 1
+    ORDER BY r.created_at DESC LIMIT 6
+")->fetchAll();
+if (!function_exists('review_month_label')) {
+    function review_month_label(string $dt): string {
+        $months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+        $ts = strtotime($dt);
+        return $months[(int)date('n', $ts) - 1] . ' ' . date('Y', $ts);
+    }
+}
 ?>
 
 <!-- ═══ HERO — full-bleed house photo, asymmetric overlay, word-by-word headline ═══ -->
@@ -11,17 +29,26 @@ require_once __DIR__ . '/includes/header.php';
   <div class="hero__overlay"></div>
   <div class="hero__bottom-fade"></div>
 
+  <div style="position:absolute;top:24px;right:24px;z-index:5;font-size:.8rem">
+    <?php
+    $qs = $_GET; unset($qs['lang']);
+    $svActive = current_lang() === 'sv' ? ' style="font-weight:700;text-decoration:underline"' : '';
+    $enActive = current_lang() === 'en' ? ' style="font-weight:700;text-decoration:underline"' : '';
+    ?>
+    <a href="?<?= htmlspecialchars(http_build_query(array_merge($qs, ['lang' => 'sv']))) ?>" style="color:rgba(255,255,255,.7)"<?= $svActive ?>>SV</a>
+    <span style="color:rgba(255,255,255,.4)"> / </span>
+    <a href="?<?= htmlspecialchars(http_build_query(array_merge($qs, ['lang' => 'en']))) ?>" style="color:rgba(255,255,255,.7)"<?= $enActive ?>>EN</a>
+  </div>
+
   <div class="container hero__content">
 
     <!-- Headline: each word wrapped for clip-reveal animation -->
     <div class="hero__headline">
       <h1 id="hero-h1">
         <?php
-        $lines = [
-          ['En', 'modern'],
-          ['plattform'],
-          ['för', '<em>byggtjänster.</em>'],
-        ];
+        $lines = current_lang() === 'en'
+          ? [['A', 'modern'], ['platform'], ['for', '<em>construction.</em>']]
+          : [['En', 'modern'], ['plattform'], ['för', '<em>byggtjänster.</em>']];
         foreach ($lines as $words) {
           foreach ($words as $word) {
             $isHtml = strpos($word, '<') !== false;
@@ -36,20 +63,20 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <p class="hero__sub">
-      M2 samordnar ett nätverk av kvalitetssäkrade partners.<br>Du har <strong style="color:var(--gold-lt)">en kontaktpunkt</strong> – vi hanterar resten.
+      <?= t('home.hero_sub') ?>
     </p>
 
     <div class="hero__actions">
-      <a href="/offert" class="btn btn--primary btn--lg">Kom igång – kostnadsfritt</a>
-      <a href="#plattformen" class="btn btn--outline-dark btn--lg">Hur det fungerar</a>
+      <a href="/offert" class="btn btn--primary btn--lg"><?= e(t('home.cta_start')) ?></a>
+      <a href="#plattformen" class="btn btn--outline-dark btn--lg"><?= e(t('home.cta_how')) ?></a>
     </div>
 
     <!-- Trust badges -->
     <div class="hero__trust">
       <?php foreach([
-        ['<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>','En kontaktpunkt','Du pratar med oss – vi koordinerar allt'],
-        ['<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>','Kvalitetssäkrade partners','Noga utvalda specialister'],
-        ['<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>','Transparent process','Fast pris, tydlig tidplan, nöjd kund garanti'],
+        ['<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>', t('home.trust_contact'), t('home.trust_contact_sub')],
+        ['<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', t('home.trust_quality'), t('home.trust_quality_sub')],
+        ['<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', t('home.trust_transparent'), t('home.trust_transparent_sub')],
       ] as $t): ?>
       <div class="hero__trust-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= $t[0] ?></svg>
@@ -434,6 +461,7 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 </section>
 
+<?php if ($siteReviews): ?>
 <!-- ═══ TESTIMONIALS ═══ -->
 <section class="section" style="background:var(--surface)">
   <div class="container">
@@ -442,27 +470,30 @@ require_once __DIR__ . '/includes/header.php';
       <h2>Vad kunderna säger</h2>
     </div>
     <div class="testimonials-grid reveal-group">
-      <?php foreach([
-        [5,'Fantastiskt takbyte! Fast pris som hölls, snabbt och noga. ROT-avdraget sköttes smidigt. Kan verkligen rekommendera – anlita ingen annan!','Johan Pettersson','Hovås, Göteborg','Jan 2025'],
-        [5,'Fasadmålning av vår villa i Askim – otrolig förvandling. Kommunikationen var tydlig hela vägen. 5 stjärnor utan tvekan!','Maria Lindqvist','Askim, Göteborg','Dec 2024'],
-        [5,'Anlitade M2 för taktvätt och takmålning. Professionellt team, snabb respons och exakt fast pris. Rekommenderas starkt.','Erik Karlsson','Kungsbacka','Feb 2025'],
-      ] as $r): ?>
+      <?php foreach ($siteReviews as $r): ?>
       <div class="review-card reveal">
-        <div class="review-card__stars" aria-label="<?= $r[0] ?> av 5 stjärnor" role="img"><?= str_repeat('★', $r[0]) ?></div>
-        <p class="review-card__text">"<?= htmlspecialchars($r[1]) ?>"</p>
+        <div class="review-card__stars" aria-label="<?= (int)$r['rating'] ?> av 5 stjärnor" role="img"><?= str_repeat('★', (int)$r['rating']) ?></div>
+        <p class="review-card__text">"<?= e($r['body']) ?>"</p>
         <div class="review-card__author">
-          <div class="review-card__avatar"><?= implode('', array_map(fn($w)=>$w[0], explode(' ', $r[2]))) ?></div>
+          <div class="review-card__avatar"><?= e(implode('', array_map(fn($w)=>mb_substr($w,0,1), explode(' ', $r['customer_name'])))) ?></div>
           <div>
-            <div class="review-card__name"><?= htmlspecialchars($r[2]) ?></div>
-            <div class="review-card__loc"><?= htmlspecialchars($r[3]) ?> · <?= $r[4] ?></div>
+            <div class="review-card__name"><?= e($r['customer_name']) ?></div>
+            <div class="review-card__loc"><?= e($r['customer_city'] ?: '') ?> · <?= e(review_month_label($r['created_at'])) ?></div>
           </div>
           <div class="review-card__g">G</div>
         </div>
+        <?php if ($r['reply_body']): ?>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:var(--r-md);border-left:3px solid var(--copper)">
+          <div style="font-size:11.5px;font-weight:600;color:var(--copper);margin-bottom:4px">Svar från M2 Bygg Team</div>
+          <div style="font-size:13px;color:var(--steel)"><?= e($r['reply_body']) ?></div>
+        </div>
+        <?php endif; ?>
       </div>
       <?php endforeach; ?>
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <!-- ═══ CTA BAND ═══ -->
 <section class="cta-band">

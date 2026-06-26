@@ -40,9 +40,11 @@ jobs:
             **/.git*/**
             **/.github/**
             **/data/*.sqlite*
-            **/uploads/**
+            uploads/portfolio/**
+            uploads/services/**
             router.php
             start-local.sh
             start-local.bat
             DEPLOY.md
             README.md
+            INSTALL.md

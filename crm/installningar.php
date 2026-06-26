@@ -13,6 +13,10 @@ $stats = [];
 foreach (['leads','customers','quotes','projects','invoices','suppliers','timeline','users'] as $t) {
     $stats[$t] = $pdo->query("SELECT COUNT(*) FROM $t")->fetchColumn();
 }
+
+// Notification send log
+$notifLog = $pdo->query("SELECT * FROM notifications_log ORDER BY created_at DESC LIMIT 40")->fetchAll();
+$notifFailCount = $pdo->query("SELECT COUNT(*) FROM notifications_log WHERE status='failed'")->fetchColumn();
 ?>
 
 <div class="topbar">
@@ -42,9 +46,45 @@ foreach (['leads','customers','quotes','projects','invoices','suppliers','timeli
         </tbody>
       </table>
     </div>
+
+    <div class="card card--pad" style="margin-top:16px">
+      <h3 style="font-size:14.5px;margin-bottom:14px">
+        E-post/SMS-utskick
+        <?php if ($notifFailCount): ?><span class="badge badge-warning" style="font-size:11px;margin-left:6px"><?= $notifFailCount ?> misslyckade</span><?php endif; ?>
+      </h3>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Tid</th><th>Kanal</th><th>Mottagare</th><th>Ämne</th><th>Status</th></tr></thead>
+          <tbody>
+          <?php if (!$notifLog): ?><tr><td colspan="5" style="color:var(--gray);font-size:13px">Inga utskick ännu.</td></tr><?php endif; ?>
+          <?php foreach ($notifLog as $n): ?>
+          <tr style="cursor:default">
+            <td style="font-size:12px;color:var(--gray);white-space:nowrap"><?= dt($n['created_at'], 'j M H:i') ?></td>
+            <td><span class="badge" style="background:#F3F4F6;color:var(--gray)"><?= e($n['channel']) ?></span></td>
+            <td style="font-size:12.5px"><?= e($n['recipient']) ?></td>
+            <td style="font-size:12px;color:var(--gray);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= e($n['subject'] ?? '') ?></td>
+            <td>
+              <?php if ($n['status'] === 'sent'): ?><span class="badge badge-success">Skickat</span>
+              <?php else: ?><span class="badge badge-danger" title="<?= e($n['error'] ?? '') ?>">Misslyckades</span><?php endif; ?>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card card--pad">
+      <h3 style="font-size:14.5px;margin-bottom:12px">Integrationer</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--gray)">SMTP e-post</span><strong style="color:<?= defined('SMTP_PASS_OVERRIDE') ? 'var(--green)' : 'var(--amber)' ?>"><?= defined('SMTP_PASS_OVERRIDE') ? 'Konfigurerad' : 'Standardlösenord' ?></strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--gray)">SMS (46elks)</span><strong style="color:<?= defined('SMS_PROVIDER_USER') ? 'var(--green)' : 'var(--gray-lt)' ?>"><?= defined('SMS_PROVIDER_USER') ? 'Aktiverad' : 'Ej konfigurerad' ?></strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--gray)">Stripe-betalning</span><strong style="color:<?= defined('STRIPE_SECRET_KEY') && STRIPE_SECRET_KEY !== '' ? 'var(--green)' : 'var(--gray-lt)' ?>"><?= defined('STRIPE_SECRET_KEY') && STRIPE_SECRET_KEY !== '' ? 'Aktiverad' : 'Ej konfigurerad' ?></strong></div>
+      </div>
+      <p style="font-size:11.5px;color:var(--gray-lt);margin-top:10px">Konfigureras i crm/config.php och send/config.local.php.</p>
+    </div>
     <div class="card card--pad">
       <h3 style="font-size:14.5px;margin-bottom:12px">Systeminfo</h3>
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">

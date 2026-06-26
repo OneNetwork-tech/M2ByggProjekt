@@ -2,6 +2,7 @@
 $page_title = 'Klottersanering Göteborg';
 $page_description = 'Professionell klottersanering i Göteborg till fast pris. Snabb borttagning på alla underlag. Skyddsbehandling. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Klottersanering Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

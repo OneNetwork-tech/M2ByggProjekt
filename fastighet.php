@@ -2,6 +2,7 @@
 $page_title = 'Fastighetspartner Göteborg – Avtal för BRF, Fastighetsbolag & Förvaltare';
 $page_description = 'M2 Bygg Team erbjuder ramavtal och löpande underhåll för BRF:er, fastighetsbolag, fastighetsägare och förvaltare i Göteborg och Västsverige. Prioriterad service, fast kontaktperson och 5 år garanti.';
 $active_page = 'fastighet';
+$breadcrumbs = [['Hem', '/'], ['För fastigheter', null]];
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -13,7 +14,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- HERO -->
 <section class="hero" style="padding:90px 0 80px;min-height:0">
-  <div class="hero__bg" style="background-image:url('/uploads/fasad-renovering.jpg')"></div>
+ <!-- <div class="hero__bg" style="background-image:url('/uploads/fasad-renovering.jpg')"></div> -->
   <div class="hero__overlay"></div>
   <div class="container hero__content">
     <div style="max-width:640px">

@@ -8,7 +8,10 @@ function portal_start(): void {
     if (session_status() === PHP_SESSION_NONE) {
         session_name('m2portal_session');
         session_set_cookie_params([
-            'lifetime' => 0, 'path' => '/portal',
+            // Path is site-wide (not just /portal) so a customer's portal login is also
+            // recognized on /blogg for commenting. Still httponly + samesite=Lax, so this
+            // doesn't expose the session token to scripts or cross-site requests.
+            'lifetime' => 0, 'path' => '/',
             'secure' => isset($_SERVER['HTTPS']),
             'httponly' => true, 'samesite' => 'Lax',
         ]);
@@ -92,4 +95,6 @@ function portal_validate_invite(string $token): ?array {
     return $s->fetch() ?: null;
 }
 
-function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('e')) {
+    function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+}

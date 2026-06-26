@@ -1,20 +1,25 @@
 <?php
+require_once __DIR__ . '/crm/includes/db.php';
 $page_title       = 'Projekt & Portfolio – Verkliga resultat';
 $page_description = 'Se våra projekt – M2 Bygg Team AB. Takbyten, fasadrenoveringar, plåtarbeten och markarbeten i Göteborg och Västsverige.';
 $active_page      = 'projekt';
+$breadcrumbs      = [['Hem', '/'], ['Projekt', null]];
 require_once __DIR__ . '/includes/header.php';
 
-$projects = [
-  ['cat'=>'tak','img'=>'https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=700&q=80','title'=>'Takbyte Kungsbacka','sub'=>'Tegeltak · 165 m² · 2025','h'=>280],
-  ['cat'=>'fasad','img'=>'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80','title'=>'Fasadmålning Mölndal','sub'=>'Träfasad · 220 m² · 2025','h'=>340],
-  ['cat'=>'plat','img'=>'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=700&q=80','title'=>'Plåtarbete Hovås','sub'=>'Hängrännor & stuprör · 2024','h'=>220],
-  ['cat'=>'mark','img'=>'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=700&q=80','title'=>'Stenläggning Askim','sub'=>'Natursten terrass · 45 m² · 2024','h'=>300],
-  ['cat'=>'fasad','img'=>'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80','title'=>'Fasadrenovering Kungälv','sub'=>'Putsfasad · 180 m² · 2024','h'=>250],
-  ['cat'=>'tak','img'=>'https://images.unsplash.com/photo-1521336575822-6da63fb45455?w=700&q=80','title'=>'Taktvätt Alingsås','sub'=>'Mossbehandling · 140 m² · 2024','h'=>210],
-  ['cat'=>'tak','img'=>'https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=700&q=80','title'=>'Takmålning Lerum','sub'=>'Betongpannor · 130 m² · 2024','h'=>260],
-  ['cat'=>'fasad','img'=>'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80','title'=>'Fasadtvätt Hisingen','sub'=>'Högtryckstvätt · 2024','h'=>230],
-  ['cat'=>'mark','img'=>'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=700&q=80','title'=>'Markarbete Härryda','sub'=>'Dränering & schaktning · 2023','h'=>290],
-];
+$portfolioRows = db()->query(
+    "SELECT pp.*, r.rating AS review_rating
+     FROM portfolio_projects pp
+     LEFT JOIN reviews r ON r.project_id = pp.linked_project_id AND r.visible = 1
+     WHERE pp.visible = 1 ORDER BY pp.sort_order, pp.created_at DESC"
+)->fetchAll();
+$projects = array_map(fn($p) => [
+    'cat'    => $p['category'],
+    'img'    => $p['image'],
+    'title'  => $p['title'],
+    'sub'    => $p['subtitle'],
+    'h'      => (int)$p['height'],
+    'rating' => $p['review_rating'] ? (int)$p['review_rating'] : null,
+], $portfolioRows);
 ?>
 
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">
@@ -23,12 +28,15 @@ $projects = [
   <span>Projekt</span>
 </div></div></div>
 
-<section class="hero" style="padding:80px 0 70px;text-align:center">
-  <div class="hero__bg" style="background-image:url('https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=1600&q=80')"></div>
-  <div class="hero__overlay"></div>
+<section class="hero hero--collage" style="padding:90px 0 80px;text-align:center">
+  <div class="hero-collage" aria-hidden="true">
+    <div class="hero-collage__tile hero-collage__tile--1" style="background-image:url('/uploads/projekt.jpg')"></div>
+
+  </div>
+  <div class="hero__overlay hero__overlay--collage"></div>
   <div class="container hero__content">
     <div style="max-width:560px;margin:0 auto">
-      <p class="eyebrow animate-in" style="color:var(--copper-lt);justify-content:center;margin:0 auto 18px">1 000+ slutförda projekt</p>
+      <p class="eyebrow animate-in" style="color:var(--gold-lt);justify-content:center;margin:0 auto 18px">1 000+ slutförda projekt</p>
       <h1 class="animate-in delay-1" style="margin-bottom:14px">Verkliga resultat</h1>
       <p class="animate-in delay-2">Alla bilder är från verkliga uppdrag vi utfört i Göteborg och Västsverige.</p>
     </div>
@@ -77,19 +85,22 @@ $projects = [
     <!-- Masonry -->
     <div style="columns:3;column-gap:14px" id="proj-grid">
       <?php foreach ($projects as $p): ?>
-      <div data-cat="<?= $p['cat'] ?>"
+      <div data-cat="<?= e($p['cat']) ?>"
            style="break-inside:avoid;margin-bottom:14px;border-radius:var(--r-xl);overflow:hidden;position:relative;cursor:pointer;transition:transform .25s var(--ease-out),box-shadow .25s"
            onmouseover="this.querySelector('.proj-overlay').style.opacity='1';this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow-xl)'"
            onmouseout="this.querySelector('.proj-overlay').style.opacity='0';this.style.transform='translateY(0)';this.style.boxShadow='none'"
-           onclick="openLightbox('<?= $p['img'] ?>','<?= $p['title'] ?>','<?= $p['sub'] ?>')">
-        <img src="<?= $p['img'] ?>" alt="<?= $p['title'] ?>" loading="lazy"
-             style="width:100%;height:<?= $p['h'] ?>px;object-fit:cover;display:block;filter:brightness(.85);transition:filter .3s">
+           onclick="openLightbox(<?= json_encode($p['img']) ?>,<?= json_encode($p['title']) ?>,<?= json_encode($p['sub']) ?>)">
+        <img src="<?= e($p['img']) ?>" alt="<?= e($p['title']) ?>" loading="lazy"
+             style="width:100%;height:<?= (int)$p['h'] ?>px;object-fit:cover;display:block;filter:brightness(.85);transition:filter .3s">
         <div class="proj-overlay" style="position:absolute;inset:0;background:linear-gradient(0,rgba(29,29,31,.88) 0%,transparent 55%);opacity:0;transition:opacity .25s;display:flex;flex-direction:column;justify-content:flex-end;padding:18px">
-          <div style="display:flex;gap:6px;margin-bottom:7px">
-            <span style="background:var(--copper);color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;font-family:var(--font-text)"><?= ucfirst($p['cat']) ?></span>
+          <div style="display:flex;gap:6px;margin-bottom:7px;align-items:center">
+            <span style="background:var(--copper);color:#fff;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;font-family:var(--font-text)"><?= e(ucfirst($p['cat'])) ?></span>
+            <?php if ($p['rating']): ?>
+            <span style="color:#f5c94c;font-size:12px;letter-spacing:1px"><?= str_repeat('★', $p['rating']) ?></span>
+            <?php endif; ?>
           </div>
-          <div style="font-family:var(--font-display);font-weight:600;font-size:15px;color:#fff;margin-bottom:3px"><?= $p['title'] ?></div>
-          <div style="font-size:12.5px;color:rgba(255,255,255,.6)"><?= $p['sub'] ?></div>
+          <div style="font-family:var(--font-display);font-weight:600;font-size:15px;color:#fff;margin-bottom:3px"><?= e($p['title']) ?></div>
+          <div style="font-size:12.5px;color:rgba(255,255,255,.6)"><?= e($p['sub']) ?></div>
         </div>
       </div>
       <?php endforeach; ?>

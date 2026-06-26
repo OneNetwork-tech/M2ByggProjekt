@@ -1,0 +1,17 @@
+{
+  "name": "M2 Kundportal",
+  "short_name": "M2 Kund",
+  "description": "Projekt, offerter, fakturor och meddelanden för M2 Bygg Teams kunder.",
+  "start_url": "/portal/",
+  "scope": "/portal/",
+  "display": "standalone",
+  "background_color": "#111318",
+  "theme_color": "#111318",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/portal/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/portal/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/portal/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/portal/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -46,6 +46,9 @@ require_once __DIR__ . '/includes/crm-header.php';
     <div class="topbar__sub">Kund sedan <?= dt($cust['created_at']) ?> · Livstidsvärde: <strong><?= money($ltv) ?></strong></div>
   </div>
   <div class="topbar__actions">
+    <?php if ($me['role'] === 'super_admin'): ?>
+    <a href="gdpr.php?export=customer&id=<?= $id ?>" class="btn btn--ghost btn--sm" title="GDPR-export">📄 Exportera data</a>
+    <?php endif; ?>
     <a href="portal-inbjudan.php?customer=<?= $id ?>" class="btn btn--outline btn--sm">🔗 Bjud in till portal</a>
     <a href="offert.php?customer=<?= $id ?>" class="btn btn--primary">+ Ny offert</a>
   </div>

@@ -1,11 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/mailer.php';
 $me = require_login();
 $pdo = db();
 
 $id = (int)($_GET['id'] ?? 0);
-$stmt = $pdo->prepare("SELECT i.*, c.name AS cname, c.address AS caddr, c.city AS ccity, c.postal_code AS czip FROM invoices i LEFT JOIN customers c ON c.id=i.customer_id WHERE i.id=?");
+$stmt = $pdo->prepare("SELECT i.*, c.name AS cname, c.email AS cemail, c.address AS caddr, c.city AS ccity, c.postal_code AS czip FROM invoices i LEFT JOIN customers c ON c.id=i.customer_id WHERE i.id=?");
 $stmt->execute([$id]);
 $inv = $stmt->fetch();
 if (!$inv) { header('Location: fakturor.php'); exit; }
@@ -19,6 +20,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset(INVOICE_STATUSES[$status])) {
             $pdo->prepare("UPDATE invoices SET status=? WHERE id=?")->execute([$status, $id]);
             log_timeline('invoice', $id, 'status', 'Status: ' . INVOICE_STATUSES[$status]['label'], '', $me['id']);
+
+            if ($status === 'sent' && !empty($inv['cemail'])) {
+                crm_send_mail(
+                    $inv['cemail'], $inv['cname'] ?: $inv['cemail'],
+                    'Faktura från M2 Bygg Team — ' . $inv['invoice_no'],
+                    '<p>Hej ' . htmlspecialchars($inv['cname'] ?? '', ENT_QUOTES, 'UTF-8') . '!</p><p>Du har fått en ny faktura: <strong>' . htmlspecialchars($inv['invoice_no'], ENT_QUOTES, 'UTF-8') . '</strong> på ' . number_format($inv['total'],0,',',' ') . ' kr, förfaller ' . e(dt($inv['due_date'])) . '.</p><p>Logga in på din kundportal för att se fakturan och betala.</p>',
+                    'invoice', $id,
+                    (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/portal/fakturor.php',
+                    'Visa & betala faktura'
+                );
+            } elseif ($status === 'overdue' && !empty($inv['cemail'])) {
+                crm_send_mail(
+                    $inv['cemail'], $inv['cname'] ?: $inv['cemail'],
+                    'Påminnelse: Förfallen faktura — ' . $inv['invoice_no'],
+                    '<p>Hej ' . htmlspecialchars($inv['cname'] ?? '', ENT_QUOTES, 'UTF-8') . '!</p><p>Faktura <strong>' . htmlspecialchars($inv['invoice_no'], ENT_QUOTES, 'UTF-8') . '</strong> på ' . number_format($inv['total'],0,',',' ') . ' kr förföll ' . e(dt($inv['due_date'])) . '. Vänligen betala snarast.</p>',
+                    'invoice', $id,
+                    (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/portal/fakturor.php',
+                    'Betala nu'
+                );
+            }
+
             flash('Status uppdaterad.');
         }
         header("Location: faktura.php?id=$id"); exit;
@@ -67,7 +89,7 @@ require_once __DIR__ . '/includes/crm-header.php';
     <div class="topbar__sub"><?= e($inv['cname'] ?: 'Ingen kund') ?> · Förfaller <?= dt($inv['due_date']) ?></div>
   </div>
   <div class="topbar__actions">
-    <button class="btn btn--ghost" onclick="print()">🖨 Skriv ut</button>
+    <a href="faktura-pdf.php?id=<?= $id ?>" target="_blank" class="btn btn--ghost">🖨 PDF</a>
     <?php if ($inv['status'] === 'draft'): ?>
     <form method="POST" style="display:inline"><?= csrf_field() ?><input type="hidden" name="action" value="status"><input type="hidden" name="status" value="sent">
       <button class="btn btn--primary">Markera som skickad</button></form>

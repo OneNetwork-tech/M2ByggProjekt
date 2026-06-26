@@ -29,6 +29,23 @@ define('COMPANY_EMAIL', 'info@m2team.se');
 define('COMPANY_ADDR',  'Lillhagsvägen 88, 442 43 Hisings Backa');
 define('VAT_RATE', 0.25);                            // 25% moms
 define('ROT_RATE', 0.30);                            // 30% ROT på arbete
+define('GOOGLE_REVIEW_URL', 'https://g.page/r/review'); // TODO: replace with real Google Business review link
+
+// ── SMS PROVIDER (46elks) — uncomment + fill in to enable SMS ──
+// define('SMS_PROVIDER_USER', 'your-46elks-api-username');
+// define('SMS_PROVIDER_PASS', 'your-46elks-api-password');
+// define('SMS_FROM', 'M2Team');
+
+// ── STRIPE (online invoice payment) ─────────────────────────
+// define('STRIPE_SECRET_KEY', 'sk_test_...');
+// define('STRIPE_PUBLISHABLE_KEY', 'pk_test_...');
+// define('STRIPE_WEBHOOK_SECRET', 'whsec_...');
+
+// ── ACCOUNTING SYNC (Fortnox / Visma eEkonomi) ──────────────
+// define('FORTNOX_CLIENT_ID', '...');
+// define('FORTNOX_CLIENT_SECRET', '...');
+// define('VISMA_CLIENT_ID', '...');
+// define('VISMA_CLIENT_SECRET', '...');
 
 // ── ROLES ─────────────────────────────────────────────────
 const ROLES = [

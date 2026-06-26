@@ -4,7 +4,7 @@
  * ?project=ID or ?customer=ID
  */
 require_once __DIR__ . '/includes/auth.php';
-require_role(['super_admin','project','support']);
+$me = require_role(['super_admin','project','support']);
 $pdo = db();
 
 $pid = (int)($_GET['project'] ?? $_POST['project_id'] ?? 0);
@@ -94,8 +94,8 @@ require_once __DIR__ . '/includes/crm-header.php';
   <div>
     <div class="card card--pad">
       <h3 style="font-size:14.5px;margin-bottom:16px">Ladda upp dokument</h3>
-      <?php if ($error): ?><div class="alert alert-danger" style="margin-bottom:14px"><?= e($error) ?></div><?php endif; ?>
-      <?php if ($success): ?><div class="alert alert-success" style="margin-bottom:14px"><?= e($success) ?></div><?php endif; ?>
+      <?php if ($error): ?><div class="flash" style="margin-bottom:14px;border-color:#DC262633;background:#DC26260d;color:var(--red)"><?= e($error) ?></div><?php endif; ?>
+      <?php if ($success): ?><div class="flash" style="margin-bottom:14px;border-color:#05966933;background:#0596690d;color:var(--green)"><?= e($success) ?></div><?php endif; ?>
       <form method="post" enctype="multipart/form-data">
         <?= csrf_field() ?>
         <?php if (!$project): ?>

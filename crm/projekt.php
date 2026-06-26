@@ -1,8 +1,7 @@
 <?php
-$crm_title = 'Projekt';
-$crm_page  = 'projekt';
-require_once __DIR__ . '/includes/crm-header.php';
-require_role(['project','sales']);
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+$me = require_role(['project','sales']);
 $pdo = db();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
@@ -26,6 +25,10 @@ else                           $where = "WHERE p.status = " . $pdo->quote($filte
 
 $projects = $pdo->query("SELECT p.*, c.name AS customer_name FROM projects p LEFT JOIN customers c ON c.id=p.customer_id $where ORDER BY p.created_at DESC")->fetchAll();
 $customers = $pdo->query("SELECT id, name FROM customers ORDER BY name")->fetchAll();
+
+$crm_title = 'Projekt';
+$crm_page  = 'projekt';
+require_once __DIR__ . '/includes/crm-header.php';
 ?>
 
 <div class="topbar">

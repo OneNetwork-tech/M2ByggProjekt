@@ -2,6 +2,7 @@
 $page_title       = 'Tak & Fasad Trollhättan – Fast Pris & ROT-avdrag';
 $page_description = 'M2 Bygg Team AB – tak, fasad och plåtarbeten i Trollhättan. Fast pris, ROT-avdrag, 5 år garanti. Lokala hantverkare. Ring 031-96 88 88.';
 $active_page      = '';
+$breadcrumbs      = [['Hem', '/'], ['Trollhättan', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <script type="application/ld+json">

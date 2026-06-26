@@ -2,6 +2,7 @@
 $page_title = 'Klä in fasad Göteborg – Fasadbeklädnad till fast pris';
 $page_description = 'Professionell infaskning och fasadbeklädnad i Göteborg. Träpanel, fibercementskivor och puts. Fast pris, ROT-avdrag och 5 år garanti. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Klä in fasad Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

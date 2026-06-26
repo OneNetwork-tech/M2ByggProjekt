@@ -1,8 +1,7 @@
 <?php
-$crm_title = 'Leverantörer';
-$crm_page  = 'leverantorer';
-require_once __DIR__ . '/includes/crm-header.php';
-require_role(['project']);
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+$me = require_role(['project']);
 $pdo = db();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,6 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $suppliers = $pdo->query("
   SELECT s.*, (SELECT COUNT(*) FROM projects p WHERE p.supplier_id = s.id) AS project_count
   FROM suppliers s ORDER BY s.created_at DESC")->fetchAll();
+
+$crm_title = 'Leverantörer';
+$crm_page  = 'leverantorer';
+require_once __DIR__ . '/includes/crm-header.php';
 ?>
 
 <div class="topbar">
@@ -42,10 +45,10 @@ $suppliers = $pdo->query("
 <div class="card">
   <div class="table-wrap">
     <table class="data">
-      <thead><tr><th>Företag</th><th>Kontakt</th><th>Specialitet</th><th>Status</th><th>Projekt</th><th>Ändra status</th></tr></thead>
+      <thead><tr><th>Företag</th><th>Kontakt</th><th>Specialitet</th><th>Status</th><th>Projekt</th><th>Betyg</th><th>Ändra status</th></tr></thead>
       <tbody>
         <?php if (!$suppliers): ?>
-        <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:36px">Inga leverantörer ännu. Ansökningar via webben hamnar här.</td></tr>
+        <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:36px">Inga leverantörer ännu. Ansökningar via webben hamnar här.</td></tr>
         <?php endif; ?>
         <?php foreach ($suppliers as $s): ?>
         <tr>
@@ -54,6 +57,7 @@ $suppliers = $pdo->query("
           <td><?= e($s['specialty'] ?: '–') ?></td>
           <td><?= badge($s['status'], SUPPLIER_STATUSES) ?></td>
           <td><?= $s['project_count'] ?></td>
+          <td style="color:#D97706;font-size:12px;white-space:nowrap"><?= $s['rating'] > 0 ? number_format($s['rating'], 1, ',', '') . ' ★' : '<span style="color:var(--gray)">—</span>' ?></td>
           <td>
             <form method="POST" style="display:flex;gap:6px">
               <?= csrf_field() ?><input type="hidden" name="action" value="status"><input type="hidden" name="id" value="<?= $s['id'] ?>">
@@ -65,6 +69,9 @@ $suppliers = $pdo->query("
               <button class="btn btn--ghost btn--sm">OK</button>
             </form>
             <a href="leverantor-inbjudan.php?supplier=<?= $s['id'] ?>" class="btn btn--ghost btn--sm" title="Bjud in till portal">🔗</a>
+            <?php if ($me['role'] === 'super_admin'): ?>
+            <a href="gdpr.php?export=supplier&id=<?= $s['id'] ?>" class="btn btn--ghost btn--sm" title="GDPR-export">📄</a>
+            <?php endif; ?>
           </td>
         </tr>
         <?php endforeach; ?>

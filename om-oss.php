@@ -2,6 +2,7 @@
 $page_title       = 'Om oss – Lokala hantverkare i Göteborg';
 $page_description = 'M2 Bygg Team AB – Lokalt förankrat byggföretag i Hisings Backa. Fast pris, 5 år garanti, 1 000+ nöjda kunder. Läs om oss.';
 $active_page      = 'om-oss';
+$breadcrumbs      = [['Hem', '/'], ['Om oss', null]];
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -13,7 +14,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- HERO -->
 <section class="hero" style="min-height:auto;padding:80px 0 70px">
-  <div class="hero__bg" style="background-image:url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&q=80')"></div>
+  <div class="hero__bg" style="background-image:url('')"></div>
   <div class="hero__overlay"></div>
   <div class="container hero__content">
     <div style="max-width:600px">

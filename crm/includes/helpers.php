@@ -3,7 +3,9 @@
  * M2 Platform — View & Format Helpers
  */
 
-function e(?string $s): string { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('e')) {
+    function e(?string $s): string { return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
+}
 
 function money(float $n): string { return number_format($n, 0, ',', ' ') . ' kr'; }
 
@@ -38,7 +40,7 @@ function initials(string $name): string {
     return mb_strtoupper($out);
 }
 
-function flash(string $msg = null, string $type = 'success') {
+function flash(?string $msg = null, string $type = 'success') {
     if ($msg !== null) { $_SESSION['flash'] = ['msg' => $msg, 'type' => $type]; return; }
     if (!empty($_SESSION['flash'])) {
         $f = $_SESSION['flash']; unset($_SESSION['flash']);

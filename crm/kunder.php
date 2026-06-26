@@ -1,7 +1,7 @@
 <?php
-$crm_title = 'Kunder';
-$crm_page  = 'kunder';
-require_once __DIR__ . '/includes/crm-header.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+$me = require_login();
 $pdo = db();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
@@ -30,6 +30,10 @@ $stmt = $pdo->prepare("
   FROM customers c WHERE $where ORDER BY c.created_at DESC");
 $stmt->execute($params);
 $customers = $stmt->fetchAll();
+
+$crm_title = 'Kunder';
+$crm_page  = 'kunder';
+require_once __DIR__ . '/includes/crm-header.php';
 ?>
 
 <div class="topbar">

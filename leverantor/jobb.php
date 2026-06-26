@@ -30,6 +30,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['respond'])) {
     header('Location: /leverantor/jobb.php?id='.$jid); exit;
 }
 
+// Photo upload (site photos)
+$photoError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
+    $jid = (int)$_POST['job_id'];
+    $s = db()->prepare("SELECT id FROM job_assignments WHERE id=? AND supplier_id=?");
+    $s->execute([$jid, $sid]);
+    if (!$s->fetch()) {
+        $photoError = 'Ogiltigt uppdrag.';
+    } else {
+        $f = $_FILES['photo'];
+        $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+        if ($f['error'] !== UPLOAD_ERR_OK) {
+            $photoError = 'Uppladdningsfel.';
+        } elseif ($f['size'] > 15_728_640) {
+            $photoError = 'Bilden är för stor (max 15 MB).';
+        } elseif (!in_array(mime_content_type($f['tmp_name']), $allowedMime)) {
+            $photoError = 'Endast bilder (JPG/PNG/WEBP/HEIC) är tillåtna.';
+        } else {
+            $dir = dirname(__DIR__) . '/data/portal-uploads/job-photos/';
+            if (!is_dir($dir)) mkdir($dir, 0750, true);
+            $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION)) ?: 'jpg';
+            $stored = 'job' . $jid . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+            move_uploaded_file($f['tmp_name'], $dir . $stored);
+            db()->prepare(
+                "INSERT INTO job_photos (job_assignment_id, supplier_id, stored_name, original_name, caption) VALUES (?,?,?,?,?)"
+            )->execute([$jid, $sid, $stored, $f['name'], trim($_POST['caption'] ?? '')]);
+        }
+    }
+    header('Location: /leverantor/jobb.php?id=' . $jid . ($photoError ? '&photoerror=' . urlencode($photoError) : '')); exit;
+}
+
+// Photos for detail view
+$photos = [];
+if ($detail) {
+    $ps = db()->prepare("SELECT * FROM job_photos WHERE job_assignment_id=? ORDER BY created_at DESC");
+    $ps->execute([$detail['id']]);
+    $photos = $ps->fetchAll();
+}
+
 // Job list
 $s = db()->prepare("
     SELECT ja.*, p.title AS project_title, p.address
@@ -98,9 +137,39 @@ supp_nav('/jobb.php');
       <?php endif; ?>
 
       <?php if ($detail['supplier_note'] && $detail['status'] !== 'pending'): ?>
-      <div class="card">
+      <div class="card" style="margin-bottom:20px">
         <div class="card-header"><h3>Ditt svar</h3></div>
         <div style="padding:20px;font-size:.875rem"><?= nl2br(e($detail['supplier_note'])) ?></div>
+      </div>
+      <?php endif; ?>
+
+      <?php if (in_array($detail['status'], ['accepted','completed'])): ?>
+      <div class="card">
+        <div class="card-header"><h3>Platsbilder</h3></div>
+        <div style="padding:20px">
+          <?php if (!empty($_GET['photoerror'])): ?>
+          <div class="alert alert--error" style="margin-bottom:14px"><?= e($_GET['photoerror']) ?></div>
+          <?php endif; ?>
+
+          <form method="post" enctype="multipart/form-data" style="margin-bottom:18px;display:flex;flex-direction:column;gap:10px">
+            <input type="hidden" name="job_id" value="<?= $detail['id'] ?>">
+            <input type="file" name="photo" accept="image/*" capture="environment" required style="font-size:.8125rem">
+            <input type="text" name="caption" class="form-control" placeholder="Bildtext (valfritt)">
+            <button type="submit" class="btn btn--primary btn--sm" style="align-self:flex-start">📷 Ladda upp bild</button>
+          </form>
+
+          <?php if ($photos): ?>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px">
+            <?php foreach ($photos as $p): ?>
+            <a href="/leverantor/foto.php?id=<?= $p['id'] ?>" target="_blank" style="display:block;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#f3f4f6">
+              <img src="/leverantor/foto.php?id=<?= $p['id'] ?>" alt="<?= e($p['caption'] ?: '') ?>" loading="lazy" style="width:100%;height:100%;object-fit:cover">
+            </a>
+            <?php endforeach; ?>
+          </div>
+          <?php else: ?>
+          <p style="font-size:.8125rem;color:var(--steel)">Inga bilder uppladdade ännu.</p>
+          <?php endif; ?>
+        </div>
       </div>
       <?php endif; ?>
     </div>

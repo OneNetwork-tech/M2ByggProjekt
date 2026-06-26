@@ -2,6 +2,7 @@
 $page_title       = 'Kontakt & Gratis Offert';
 $page_description = 'Kontakta M2 Bygg Team AB – Ring 031-96 88 88, skicka e-post till info@m2team.se eller fyll i formuläret. Gratis offert inom 24h. Lillhagsvägen 88, Hisings Backa.';
 $active_page      = 'kontakt';
+$breadcrumbs      = [['Hem', '/'], ['Kontakt', null]];
 require_once __DIR__ . '/includes/header.php';
 ?>
 

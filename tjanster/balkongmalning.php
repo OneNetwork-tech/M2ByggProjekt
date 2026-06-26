@@ -2,6 +2,7 @@
 $page_title = 'Balkongmålning Göteborg – Räcke och balkong till fast pris';
 $page_description = 'Professionell balkongmålning och räckesmålning i Göteborg. Rostskydd, träolja och lackering. Fast pris, ROT-avdrag och 5 år garanti. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Balkongmålning Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

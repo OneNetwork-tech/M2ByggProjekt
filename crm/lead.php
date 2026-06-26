@@ -85,6 +85,7 @@ require_once __DIR__ . '/includes/crm-header.php';
     <div class="topbar__sub"><?= e($lead['lead_no']) ?> · Inkom <?= dt($lead['created_at'], 'j M H:i') ?> · Källa: <?= e($lead['source']) ?></div>
   </div>
   <div class="topbar__actions">
+    <a href="kalender.php?lead=<?= $lead['id'] ?>" class="btn btn--ghost">📅 Boka besök</a>
     <?php if (!$lead['customer_id']): ?>
     <form method="POST" style="display:inline">
       <?= csrf_field() ?><input type="hidden" name="action" value="convert_customer">

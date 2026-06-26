@@ -6,11 +6,18 @@ if (current_user()) { header('Location: index.php'); exit; }
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (attempt_login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
+    $emailAttempt = $_POST['email'] ?? '';
+    if (!rate_limit_check('crm', $emailAttempt)) {
+        $error = 'För många felaktiga inloggningsförsök. Försök igen om 15 minuter.';
+        usleep(400000);
+    } elseif (attempt_login($emailAttempt, $_POST['password'] ?? '')) {
+        rate_limit_record('crm', $emailAttempt, true);
         header('Location: index.php'); exit;
+    } else {
+        rate_limit_record('crm', $emailAttempt, false);
+        $error = 'Fel e-post eller lösenord.';
+        usleep(400000); // slow brute force
     }
-    $error = 'Fel e-post eller lösenord.';
-    usleep(400000); // slow brute force
 }
 ?>
 <!DOCTYPE html>
@@ -89,6 +96,7 @@ body{
       </div>
       <button type="submit" class="btn">Logga in</button>
     </form>
+    <a href="forgot-password.php" style="display:block;text-align:center;margin-top:16px;font-size:13px;color:rgba(255,255,255,.45);text-decoration:none">Glömt lösenord?</a>
   </div>
   <div class="foot">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

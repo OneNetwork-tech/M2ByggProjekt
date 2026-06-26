@@ -2,6 +2,7 @@
 $page_title = 'Takrenovering Göteborg';
 $page_description = 'Professionell takrenovering i Göteborg till fast pris. Partiell reparation av läckor och skadade pannor. ROT-avdrag. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Takrenovering Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

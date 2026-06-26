@@ -67,4 +67,6 @@ function supp_validate_invite(string $token): ?array {
     return $s->fetch() ?: null;
 }
 
-function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+if (!function_exists('e')) {
+    function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
+}

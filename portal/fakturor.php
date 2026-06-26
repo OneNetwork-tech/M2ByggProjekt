@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/layout.php';
+require_once dirname(__DIR__) . '/crm/includes/stripe.php';
 $pu  = portal_require();
 $cid = (int)$pu['customer_id'];
 
@@ -20,6 +21,14 @@ portal_nav('/fakturor.php');
 <main class="portal-main">
   <div class="portal-page-title"><h1>Fakturor</h1><p>Alla fakturor kopplade till ditt konto.</p></div>
 
+  <?php if (!empty($_GET['paid'])): ?>
+  <div class="alert alert--success" style="margin-bottom:20px">✓ Betalningen mottagen, tack! Det kan ta en liten stund innan statusen uppdateras.</div>
+  <?php elseif (!empty($_GET['paycancel'])): ?>
+  <div class="alert alert--warning" style="margin-bottom:20px">Betalningen avbröts. Du kan försöka igen när du vill.</div>
+  <?php elseif (!empty($_GET['payerror'])): ?>
+  <div class="alert alert--error" style="margin-bottom:20px">Något gick fel med betalningen. Kontakta oss om problemet kvarstår.</div>
+  <?php endif; ?>
+
   <?php if ($invoices): ?>
   <div class="card">
     <table class="tbl">
@@ -37,12 +46,15 @@ portal_nav('/fakturor.php');
         <td style="font-size:.85rem<?= $inv['status'] === 'overdue' ? ';color:var(--red);font-weight:600' : '' ?>"><?= e($inv['due_date'] ?? '—') ?></td>
         <td style="text-align:right;font-weight:700"><?= number_format($inv['total'] ?? 0, 0, ',', ' ') ?> kr</td>
         <td><span class="badge badge--<?= $color ?>"><?= e($lbl) ?></span></td>
-        <td>
+        <td style="display:flex;gap:6px">
           <?php if ($inv['status'] !== 'draft'): ?>
-          <a href="/crm/offert-pdf.php?invoice=<?= $inv['id'] ?>" target="_blank" class="btn btn--outline btn--sm">
+          <a href="/crm/faktura-pdf.php?id=<?= $inv['id'] ?>" target="_blank" class="btn btn--outline btn--sm">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             PDF
           </a>
+          <?php endif; ?>
+          <?php if (stripe_enabled() && in_array($inv['status'], ['sent','partial','overdue'])): ?>
+          <a href="/portal/betala.php?invoice=<?= $inv['id'] ?>" class="btn btn--primary btn--sm">Betala nu</a>
           <?php endif; ?>
         </td>
       </tr>

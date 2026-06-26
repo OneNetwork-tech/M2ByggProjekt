@@ -2,6 +2,7 @@
 $page_title       = 'Integritetspolicy – M2 Bygg Team AB';
 $page_description = 'Integritetspolicy för M2 Bygg Team AB – hur vi behandlar dina personuppgifter i enlighet med GDPR.';
 $active_page      = '';
+$breadcrumbs      = [['Hem', '/'], ['Integritetspolicy', null]];
 require_once __DIR__ . '/includes/header.php';
 $year = date('Y');
 ?>

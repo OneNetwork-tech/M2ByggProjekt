@@ -2,6 +2,7 @@
 $page_title       = 'Prisguide 2025 – Tak, Fasad & Mark Göteborg';
 $page_description = 'Komplett prisguide 2025 för tak, fasad och markarbeten i Göteborg. Verkliga priser med och utan ROT-avdrag. M2 Bygg Team AB.';
 $active_page      = 'prisguide';
+$breadcrumbs      = [['Hem', '/'], ['Prisguide 2025', null]];
 require_once __DIR__ . '/includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

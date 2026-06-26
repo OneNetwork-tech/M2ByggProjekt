@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
+require_once dirname(__DIR__) . '/includes/i18n.php';
 portal_start();
+$lang = current_lang();
 
 // Already logged in
 if (portal_user()) {
@@ -23,9 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_password'])) {
     $inv      = portal_validate_invite($token);
     $pw       = $_POST['password'] ?? '';
     $pw2      = $_POST['password2'] ?? '';
-    if (!$inv)              $error = 'Ogiltig inbjudan.';
-    elseif (strlen($pw) < 8) $error = 'Lösenordet måste vara minst 8 tecken.';
-    elseif ($pw !== $pw2)    $error = 'Lösenorden matchar inte.';
+    if (!$inv)              $error = t('login.invalid_invite', 'Ogiltig inbjudan.');
+    elseif (strlen($pw) < 8) $error = t('login.password_too_short', 'Lösenordet måste vara minst 8 tecken.');
+    elseif ($pw !== $pw2)    $error = t('login.password_mismatch', 'Lösenorden matchar inte.');
     else {
         // Create or update portal user
         $existing = db()->prepare("SELECT id FROM portal_users WHERE customer_id = ?");
@@ -48,9 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_password'])) {
 
 // Normal login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['set_password'])) {
-    if (!portal_login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
-        $error = 'Fel e-post eller lösenord.';
+    $emailAttempt = $_POST['email'] ?? '';
+    if (!rate_limit_check('portal', $emailAttempt)) {
+        $error = t('login.rate_limited');
+        usleep(400000);
+    } elseif (!portal_login($emailAttempt, $_POST['password'] ?? '')) {
+        rate_limit_record('portal', $emailAttempt, false);
+        $error = t('login.error');
+        usleep(400000);
     } else {
+        rate_limit_record('portal', $emailAttempt, true);
         $redir = preg_match('#^/portal/#', $_GET['redir'] ?? '') ? $_GET['redir'] : '/portal/';
         header('Location: ' . $redir);
         exit;
@@ -58,14 +67,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['set_password'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="<?= e($lang) ?>">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>Logga in — M2 Kundportal</title>
+<title><?= e(t('login.title')) ?> — M2 Kundportal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/portal/assets/portal.css">
+<link rel="manifest" href="/portal/manifest.json">
+<link rel="apple-touch-icon" href="/portal/assets/icons/icon-192.png">
+<meta name="theme-color" content="#111318">
 </head>
 <body>
 <div class="portal-login">
@@ -74,9 +86,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['set_password'])) {
       <div class="portal-login__logo-mark">m2</div>
       <div class="portal-login__logo-text">
         <strong>M2 Bygg Team</strong>
-        <span>Kundportal</span>
+        <span><?= e(t('portal.badge')) ?></span>
       </div>
     </div>
+
+    <div style="text-align:right;margin-bottom:8px"><?= lang_switcher_html(true) ?></div>
 
     <?php if ($error): ?>
     <div class="alert alert--error"><?= e($error) ?></div>
@@ -84,43 +98,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['set_password'])) {
 
     <?php if ($invite && !$error): ?>
     <!-- Set password for first-time invite -->
-    <h2 style="margin-bottom:6px">Välkommen, <?= e($invite['name']) ?>!</h2>
-    <p style="color:var(--steel);font-size:.875rem;margin-bottom:24px">Skapa ett lösenord för att aktivera ditt konto.</p>
+    <h2 style="margin-bottom:6px"><?= e(sprintf(t('login.welcome'), $invite['name'])) ?></h2>
+    <p style="color:var(--steel);font-size:.875rem;margin-bottom:24px"><?= e(t('login.set_password')) ?></p>
     <form method="post">
       <input type="hidden" name="set_password" value="1">
       <input type="hidden" name="token" value="<?= e($invite['token']) ?>">
       <div class="form-group">
-        <label class="form-label">E-post</label>
+        <label class="form-label"><?= e(t('login.email')) ?></label>
         <input class="form-control" type="email" value="<?= e($invite['email']) ?>" disabled>
       </div>
       <div class="form-group">
-        <label class="form-label">Välj lösenord</label>
-        <input class="form-control" type="password" name="password" minlength="8" required autofocus placeholder="Minst 8 tecken">
+        <label class="form-label"><?= e(t('login.choose_password', 'Välj lösenord')) ?></label>
+        <input class="form-control" type="password" name="password" minlength="8" required autofocus placeholder="<?= e(t('login.min_chars', 'Minst 8 tecken')) ?>">
       </div>
       <div class="form-group">
-        <label class="form-label">Bekräfta lösenord</label>
-        <input class="form-control" type="password" name="password2" required placeholder="Upprepa lösenordet">
+        <label class="form-label"><?= e(t('login.confirm_password', 'Bekräfta lösenord')) ?></label>
+        <input class="form-control" type="password" name="password2" required placeholder="<?= e(t('login.repeat_password', 'Upprepa lösenordet')) ?>">
       </div>
-      <button type="submit" class="btn btn--primary btn--lg" style="width:100%">Aktivera konto →</button>
+      <button type="submit" class="btn btn--primary btn--lg" style="width:100%"><?= e(t('login.activate')) ?></button>
     </form>
 
     <?php else: ?>
     <!-- Normal login -->
-    <h2 style="margin-bottom:6px">Logga in</h2>
-    <p style="color:var(--steel);font-size:.875rem;margin-bottom:24px">Följ dina projekt, offerter och fakturor.</p>
+    <h2 style="margin-bottom:6px"><?= e(t('login.title')) ?></h2>
+    <p style="color:var(--steel);font-size:.875rem;margin-bottom:24px"><?= e(t('login.portal_tagline')) ?></p>
     <form method="post">
       <div class="form-group">
-        <label class="form-label">E-post</label>
+        <label class="form-label"><?= e(t('login.email')) ?></label>
         <input class="form-control" type="email" name="email" required autofocus autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label">Lösenord</label>
+        <label class="form-label"><?= e(t('login.password')) ?></label>
         <input class="form-control" type="password" name="password" required autocomplete="current-password">
       </div>
-      <button type="submit" class="btn btn--primary btn--lg" style="width:100%;margin-top:4px">Logga in →</button>
+      <button type="submit" class="btn btn--primary btn--lg" style="width:100%;margin-top:4px"><?= e(t('login.submit')) ?></button>
     </form>
-    <p style="margin-top:20px;font-size:.8rem;color:var(--steel);text-align:center">
-      Har du inget konto? Kontakta oss på <a href="mailto:info@m2team.se">info@m2team.se</a>
+    <p style="margin-top:16px;font-size:.8rem;text-align:center">
+      <a href="/portal/forgot-password.php"><?= e(t('login.forgot_password', 'Glömt lösenord?')) ?></a>
+    </p>
+    <p style="margin-top:8px;font-size:.8rem;color:var(--steel);text-align:center">
+      <?= e(t('login.no_account', 'Har du inget konto? Kontakta oss på')) ?> <a href="mailto:info@m2team.se">info@m2team.se</a>
     </p>
     <?php endif; ?>
   </div>

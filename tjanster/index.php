@@ -1,8 +1,31 @@
 <?php
+require_once __DIR__ . '/../crm/includes/db.php';
 $page_title       = 'Alla Tjänster – Tak, Fasad, Balkong & Mark | M2 Bygg Team Göteborg';
 $page_description = 'Alla tjänster från M2 Bygg Team AB – takbyte, takmålning, fasadmålning, klä in fasad, balkongmålning, plåtarbeten och stenläggning. Fast pris, ROT-avdrag, 5 år garanti i Göteborg och Västsverige.';
 $active_page      = 'tjanster';
+$breadcrumbs      = [['Hem', '/'], ['Tjänster', null]];
 require_once __DIR__ . '/../includes/header.php';
+
+$serviceRows = db()->query("SELECT * FROM services WHERE visible = 1 ORDER BY category, sort_order, title")->fetchAll();
+$categoryIcons = [
+    'Takarbeten' => '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
+    'Fasad & Balkong' => '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    'Mark & Övrigt' => '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>',
+];
+$categories = [];
+foreach ($serviceRows as $s) {
+    $cat = $s['category'];
+    if (!isset($categories[$cat])) {
+        $categories[$cat] = [
+            'id' => preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($cat)),
+            'icon' => $categoryIcons[$cat] ?? '<circle cx="12" cy="12" r="9"/>',
+            'title' => $cat,
+            'bg' => count($categories) % 2 === 1 ? 'background:var(--surface)' : '',
+            'services' => [],
+        ];
+    }
+    $categories[$cat]['services'][] = $s;
+}
 ?>
 
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">
@@ -49,134 +72,6 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 </div>
 
-<?php
-$categories = [
-
-  /* ── TAK ─────────────────────────────────────────────── */
-  [
-    'id'    => 'tak',
-    'icon'  => '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
-    'title' => 'Takarbeten',
-    'desc'  => 'Alla typer av takarbeten – takbyte, takrenovering, takmålning, taktvätt och plåtarbeten. Fast pris på alla material och taktyper.',
-    'bg'    => '',
-    'services' => [
-      [
-        'href'  => '/tjanster/takbyte',
-        'icon'  => '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
-        'title' => 'Takbyte',
-        'desc'  => 'Komplett takbyte i alla material – tegeltak, betongtak, plåttak och papptak. Demontering och nytt underlag ingår.',
-        'price' => 'från 900 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/takrenovering',
-        'icon'  => '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
-        'title' => 'Takrenovering',
-        'desc'  => 'Partiell reparation – laga läckor, byta skadade pannor och åtgärda detaljer utan att byta hela taket.',
-        'price' => 'Fast pris',
-      ],
-      [
-        'href'  => '/tjanster/takmalning',
-        'icon'  => '<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/>',
-        'title' => 'Takmålning',
-        'desc'  => 'Förnyar och skyddar taket 10–15 år till en bråkdel av kostnaden för ett nytt tak. Före & efter-resultat som syns direkt.',
-        'price' => 'från 150 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/taktvatt',
-        'icon'  => '<path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>',
-        'title' => 'Taktvätt',
-        'desc'  => 'Högtryckstvätt och mossbehandling som förlänger takets livslängd med 5–10 år. Snabbt och effektivt.',
-        'price' => 'från 80 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/platarbeten',
-        'icon'  => '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
-        'title' => 'Plåtarbeten',
-        'desc'  => 'Hängrännor, stuprör, plåttak och beslag. Stål, zink, aluminium och koppar. Skyddar grunden mot fuktskador.',
-        'price' => 'Fast pris',
-      ],
-    ],
-  ],
-
-  /* ── FASAD ───────────────────────────────────────────── */
-  [
-    'id'    => 'fasad',
-    'icon'  => '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
-    'title' => 'Fasad & Balkong',
-    'desc'  => 'Fasadmålning, fasadrenovering, infaskning och balkongmålning. Gratis färgkonsultation ingår alltid. Före & efter-foton på riktiga projekt.',
-    'bg'    => 'background:var(--surface)',
-    'services' => [
-      [
-        'href'  => '/tjanster/fasadmalning',
-        'icon'  => '<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>',
-        'title' => 'Fasadmålning',
-        'desc'  => 'Förvandlar och skyddar fasaden i 10–15 år. Träfasad, puts, tegel och skivor med gratis färgkonsultation.',
-        'price' => 'från 180 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/fasadrenovering',
-        'icon'  => '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
-        'title' => 'Fasadrenovering',
-        'desc'  => 'Lagning av sprickor, skador och åldrande fasad. Komplett renovering som håller i 15–20 år.',
-        'price' => 'Fast pris',
-      ],
-      [
-        'href'  => '/tjanster/fasadtvatt',
-        'icon'  => '<path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>',
-        'title' => 'Fasadtvätt',
-        'desc'  => 'Högtryckstvätt mot mögel, alger och smuts. Förlänger fasadens livslängd och förbered för målning.',
-        'price' => 'från 100 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/kladinfasad',
-        'icon'  => '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
-        'title' => 'Klä in fasad',
-        'desc'  => 'Träpanel, fibercementskivor eller puts. Komplett infaskning från rivning till färdig fasad – verkliga resultat som syns.',
-        'price' => 'från 350 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/balkongmalning',
-        'icon'  => '<rect x="3" y="11" width="18" height="10" rx="1"/><path d="M3 11V7a2 2 0 012-2h14a2 2 0 012 2v4"/><line x1="12" y1="6" x2="12" y2="11"/>',
-        'title' => 'Balkongmålning',
-        'desc'  => 'Balkong, räcke, trappa och uteplats. Rostskyddsbehandling för metall och träolja/lackering för trä.',
-        'price' => 'från 95 kr/lpm',
-      ],
-    ],
-  ],
-
-  /* ── MARK ────────────────────────────────────────────── */
-  [
-    'id'    => 'mark',
-    'icon'  => '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/>',
-    'title' => 'Mark & Övrigt',
-    'desc'  => 'Markarbete, stenläggning och klottersanering. Komplett service för utemiljön med fast pris.',
-    'bg'    => '',
-    'services' => [
-      [
-        'href'  => '/tjanster/markarbete',
-        'icon'  => '<path d="M2 20h20M4 20V10l8-8 8 8v10"/>',
-        'title' => 'Markarbete',
-        'desc'  => 'Schaktning, dränering och markplanering med rätt maskiner. Förbereder för stenläggning och anläggning.',
-        'price' => 'Fast pris',
-      ],
-      [
-        'href'  => '/tjanster/stenlaggning',
-        'icon'  => '<rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>',
-        'title' => 'Stenläggning',
-        'desc'  => 'Terrass, uppfart och gångvägar i natursten och betongsten. Snyggt, hållbart och fastighetsvärdesökande.',
-        'price' => 'från 500 kr/m²',
-      ],
-      [
-        'href'  => '/tjanster/klottersanering',
-        'icon'  => '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',
-        'title' => 'Klottersanering',
-        'desc'  => 'Professionell borttagning av klotter på alla underlag. Skyddsbehandling ingår. Snabb respons.',
-        'price' => 'Snabb respons',
-      ],
-    ],
-  ],
-];
-?>
 
 <?php foreach ($categories as $ci => $cat): ?>
 <section id="<?= $cat['id'] ?>" class="section" style="<?= $cat['bg'] ?>">
@@ -188,22 +83,21 @@ $categories = [
           <div style="width:48px;height:48px;background:var(--gold-lt);border:1px solid rgba(201,168,76,.25);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:22px;height:22px;color:var(--gold-dk)"><?= $cat['icon'] ?></svg>
           </div>
-          <h2 style="font-size:clamp(1.6rem,3vw,2.2rem)"><?= $cat['title'] ?></h2>
+          <h2 style="font-size:clamp(1.6rem,3vw,2.2rem)"><?= e($cat['title']) ?></h2>
         </div>
-        <p style="color:var(--steel);max-width:520px;font-size:0.95rem"><?= $cat['desc'] ?></p>
       </div>
       <a href="/offert" class="btn btn--dark reveal" style="flex-shrink:0">Begär offert</a>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px" class="reveal-group">
       <?php foreach ($cat['services'] as $s): ?>
-      <a href="<?= e($s['href']) ?>" class="service-card reveal">
+      <a href="/tjanster/<?= e($s['slug']) ?>" class="service-card reveal">
         <div class="service-card__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= $s['icon'] ?></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= service_icon_svg($s['icon_key']) ?></svg>
         </div>
-        <span class="price-badge" style="margin-bottom:10px"><?= e($s['price']) ?></span>
+        <span class="price-badge" style="margin-bottom:10px"><?= e($s['price_label'] ?: '') ?></span>
         <h3 style="font-size:1rem;font-weight:600;color:var(--coal);text-transform:none;letter-spacing:0;margin-bottom:8px"><?= e($s['title']) ?></h3>
-        <p style="font-size:0.85rem;color:var(--steel);line-height:1.65;flex:1;margin-bottom:18px"><?= e($s['desc']) ?></p>
+        <p style="font-size:0.85rem;color:var(--steel);line-height:1.65;flex:1;margin-bottom:18px"><?= e($s['description'] ?: '') ?></p>
         <span class="service-card__link">
           Läs mer
           <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>

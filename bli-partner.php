@@ -2,6 +2,7 @@
 $page_title       = 'Bli Partner – Jobba med M2 Bygg Team AB';
 $page_description = 'Bli M2 Partner – ansök som hantverkare eller underleverantör i Göteborg. Fler uppdrag, starkt varumärke och snabb betalning. Ansök nu.';
 $active_page      = '';
+$breadcrumbs      = [['Hem', '/'], ['Bli partner', null]];
 require_once __DIR__ . '/includes/header.php';
 ?>
 

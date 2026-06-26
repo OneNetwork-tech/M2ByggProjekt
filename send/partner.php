@@ -14,6 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/../crm/includes/db.php';
+
+if (!rate_limit_check('partner_form', $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', 5, 30)) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'message' => 'För många förfrågningar. Försök igen senare.']);
+    exit;
+}
+rate_limit_record('partner_form', $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', false);
 
 $company   = post('company');
 $orgnr     = post('orgnr');

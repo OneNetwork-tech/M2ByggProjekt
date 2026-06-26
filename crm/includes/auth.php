@@ -7,7 +7,7 @@ require_once __DIR__ . '/db.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_strict_mode', 1);
 session_name(SESSION_NAME);
-session_set_cookie_params(['lifetime' => SESSION_LIFETIME, 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['lifetime' => SESSION_LIFETIME, 'httponly' => true, 'samesite' => 'Lax', 'secure' => isset($_SERVER['HTTPS'])]);
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 function current_user(): ?array {

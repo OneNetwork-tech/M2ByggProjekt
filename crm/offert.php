@@ -5,6 +5,7 @@
  */
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/mailer.php';
 $me = require_login();
 $pdo = db();
 
@@ -91,6 +92,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         log_timeline('quote', $id, 'status', 'Status: ' . QUOTE_STATUSES[$status]['label'], '', $me['id']);
         audit('quote_status', 'quote', $id, $status);
 
+        // Notify customer by email when quote is sent
+        if ($status === 'sent' && $quote['customer_id']) {
+            $cs = $pdo->prepare("SELECT * FROM customers WHERE id=?"); $cs->execute([$quote['customer_id']]);
+            if ($cust = $cs->fetch()) {
+                if (!empty($cust['email'])) {
+                    crm_send_mail(
+                        $cust['email'], $cust['name'],
+                        'Din offert från M2 Bygg Team — ' . $quote['quote_no'],
+                        '<p>Hej ' . htmlspecialchars($cust['name'], ENT_QUOTES, 'UTF-8') . '!</p><p>Vi har skickat en offert till dig: <strong>' . htmlspecialchars($quote['title'], ENT_QUOTES, 'UTF-8') . '</strong> (' . htmlspecialchars($quote['quote_no'], ENT_QUOTES, 'UTF-8') . ').</p><p>Logga in på din kundportal för att granska och godkänna offerten.</p>',
+                        'quote', $id,
+                        (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/portal/offerter.php',
+                        'Visa offert i portalen'
+                    );
+                }
+            }
+        }
+
         /* ════ AUTOMATION ENGINE (per blueprint) ════
            Quote Approved → Create Project + Generate Invoice
            Lead → mark won */
@@ -169,6 +187,11 @@ $tlEvents = [];
 if ($quote) {
     $s = $pdo->prepare("SELECT * FROM timeline WHERE entity_type='quote' AND entity_id=? ORDER BY created_at DESC"); $s->execute([$id]);
     $tlEvents = $s->fetchAll();
+}
+$signature = null;
+if ($quote) {
+    $s = $pdo->prepare("SELECT * FROM quote_signatures WHERE quote_id=?"); $s->execute([$id]);
+    $signature = $s->fetch() ?: null;
 }
 
 $crm_title = $quote ? $quote['quote_no'] : 'Ny offert';
@@ -320,6 +343,18 @@ require_once __DIR__ . '/includes/crm-header.php';
         <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:9px;font-size:15px"><span style="font-weight:700">Fastpris</span><strong><?= money($quote['total']) ?></strong></div>
       </div>
     </div>
+
+    <?php if ($signature): ?>
+    <div class="card card--pad">
+      <h3 style="font-size:14.5px;margin-bottom:12px">✓ Elektronisk signatur</h3>
+      <img src="<?= e($signature['signature_data']) ?>" alt="Signatur" style="border:1px solid var(--border);border-radius:8px;max-width:100%;background:#fff;margin-bottom:10px">
+      <div style="font-size:12.5px;color:var(--gray);line-height:1.7">
+        <div><strong style="color:var(--ink)"><?= e($signature['signer_name']) ?></strong><?= $signature['signer_email'] ? ' · '.e($signature['signer_email']) : '' ?></div>
+        <div>Signerad: <?= dt($signature['signed_at'], 'j M H:i') ?></div>
+        <div>IP-adress: <?= e($signature['ip_address'] ?: '—') ?></div>
+      </div>
+    </div>
+    <?php endif; ?>
 
     <div class="card card--pad">
       <h3 style="font-size:14.5px;margin-bottom:14px">Aktivitet</h3>

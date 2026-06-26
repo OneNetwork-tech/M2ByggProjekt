@@ -1,0 +1,17 @@
+{
+  "name": "M2 Leverantörsportal",
+  "short_name": "M2 Leverantör",
+  "description": "Jobberbjudanden, tidrapporter och dokument för M2 Bygg Teams underleverantörer.",
+  "start_url": "/leverantor/",
+  "scope": "/leverantor/",
+  "display": "standalone",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/leverantor/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/leverantor/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/leverantor/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/leverantor/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

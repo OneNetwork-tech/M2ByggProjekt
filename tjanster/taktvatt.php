@@ -2,6 +2,7 @@
 $page_title = 'Taktvätt Göteborg';
 $page_description = 'Professionell taktvätt i Göteborg till fast pris. Högtryckstvätt och mossbehandling. Förlänger takets livslängd. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Taktvätt Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

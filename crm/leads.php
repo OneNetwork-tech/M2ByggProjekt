@@ -1,8 +1,7 @@
 <?php
-$crm_title = 'Leads';
-$crm_page  = 'leads';
-require_once __DIR__ . '/includes/crm-header.php';
-require_role(['sales','support','project']);
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+$me = require_role(['sales','support','project']);
 
 $pdo = db();
 
@@ -38,6 +37,10 @@ $leads = $stmt->fetchAll();
 $byStage = [];
 foreach (LEAD_STAGES as $k => $_) $byStage[$k] = [];
 foreach ($leads as $l) $byStage[$l['stage']][] = $l;
+
+$crm_title = 'Leads';
+$crm_page  = 'leads';
+require_once __DIR__ . '/includes/crm-header.php';
 ?>
 
 <div class="topbar">

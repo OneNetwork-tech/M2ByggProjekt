@@ -31,8 +31,8 @@ function db(): PDO {
     return $pdo;
 }
 
-function migrate(PDO $pdo): void {
-    $isMysql = DB_DRIVER === 'mysql';
+function migrate(PDO $pdo, ?string $driver = null): void {
+    $isMysql = ($driver ?? DB_DRIVER) === 'mysql';
     $PK   = $isMysql ? 'INT AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
     $NOW  = $isMysql ? 'CURRENT_TIMESTAMP' : "datetime('now','localtime')";
     $TXT  = 'TEXT';
@@ -191,6 +191,120 @@ function migrate(PDO $pdo): void {
         created_at $TXT DEFAULT ($NOW)
     )",
 
+    "CREATE TABLE IF NOT EXISTS invoice_reminders (
+        id $PK,
+        invoice_id INTEGER NOT NULL,
+        days_overdue INTEGER NOT NULL,
+        sent_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS blog_posts (
+        id $PK,
+        slug $TXT UNIQUE NOT NULL,
+        title $TXT NOT NULL,
+        excerpt $TXT,
+        body $TXT,
+        cover_image $TXT,
+        category $TXT DEFAULT 'tak',
+        status $TXT DEFAULT 'draft',
+        author_id INTEGER,
+        read_minutes INTEGER DEFAULT 5,
+        published_at $TXT,
+        created_at $TXT DEFAULT ($NOW),
+        updated_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS blog_comments (
+        id $PK,
+        post_id INTEGER NOT NULL,
+        portal_user_id INTEGER,
+        author_name $TXT NOT NULL,
+        body $TXT NOT NULL,
+        hidden INTEGER DEFAULT 0,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS emails (
+        id $PK,
+        to_email $TXT NOT NULL,
+        to_name $TXT,
+        entity_type $TXT,
+        entity_id INTEGER,
+        subject $TXT NOT NULL,
+        body $TXT NOT NULL,
+        status $TXT NOT NULL DEFAULT 'sent',
+        error $TXT,
+        sent_by INTEGER,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS meetings (
+        id $PK,
+        title $TXT NOT NULL,
+        contact_type $TXT NOT NULL DEFAULT 'contact',
+        contact_id INTEGER,
+        contact_name $TXT NOT NULL,
+        contact_email $TXT,
+        contact_phone $TXT,
+        location $TXT,
+        meeting_date $TXT NOT NULL,
+        start_time $TXT,
+        end_time $TXT,
+        notes $TXT,
+        created_by INTEGER,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS services (
+        id $PK,
+        category $TXT NOT NULL DEFAULT 'Övrigt',
+        icon_key $TXT DEFAULT 'tools',
+        title $TXT NOT NULL,
+        slug $TXT UNIQUE NOT NULL,
+        description $TXT,
+        price_label $TXT,
+        detail_body $TXT,
+        cover_image $TXT,
+        sort_order INTEGER DEFAULT 0,
+        visible INTEGER DEFAULT 1,
+        created_at $TXT DEFAULT ($NOW),
+        updated_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS portfolio_projects (
+        id $PK,
+        title $TXT NOT NULL,
+        subtitle $TXT,
+        category $TXT NOT NULL DEFAULT 'tak',
+        image $TXT NOT NULL,
+        height INTEGER DEFAULT 280,
+        sort_order INTEGER DEFAULT 0,
+        visible INTEGER DEFAULT 1,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS supplier_ratings (
+        id $PK,
+        job_assignment_id INTEGER NOT NULL,
+        supplier_id INTEGER NOT NULL,
+        project_id INTEGER NOT NULL,
+        rating INTEGER NOT NULL DEFAULT 5,
+        note $TXT,
+        rated_by INTEGER,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS reviews (
+        id $PK,
+        project_id INTEGER NOT NULL,
+        customer_id INTEGER NOT NULL,
+        portal_user_id INTEGER,
+        rating INTEGER NOT NULL DEFAULT 5,
+        body $TXT NOT NULL,
+        visible INTEGER DEFAULT 1,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
     "CREATE TABLE IF NOT EXISTS timeline (
         id $PK,
         entity_type $TXT NOT NULL,
@@ -280,6 +394,16 @@ function migrate(PDO $pdo): void {
         created_at $TXT DEFAULT ($NOW)
     )",
 
+    "CREATE TABLE IF NOT EXISTS password_resets (
+        id $PK,
+        user_type $TXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        token $TXT NOT NULL UNIQUE,
+        used_at $TXT,
+        expires_at $TXT NOT NULL,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
     "CREATE TABLE IF NOT EXISTS job_assignments (
         id $PK,
         project_id INTEGER NOT NULL,
@@ -309,6 +433,89 @@ function migrate(PDO $pdo): void {
         description $TXT,
         approved INTEGER DEFAULT 0,
         paid_at $TXT,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS gdpr_requests (
+        id $PK,
+        type $TXT NOT NULL,
+        entity_type $TXT NOT NULL,
+        entity_id INTEGER NOT NULL,
+        requested_by $TXT NOT NULL DEFAULT 'self',
+        status $TXT NOT NULL DEFAULT 'pending',
+        notes $TXT,
+        requested_at $TXT DEFAULT ($NOW),
+        resolved_at $TXT,
+        resolved_by INTEGER
+    )",
+
+    "CREATE TABLE IF NOT EXISTS login_attempts (
+        id $PK,
+        scope $TXT NOT NULL,
+        identifier $TXT NOT NULL,
+        ip_address $TXT NOT NULL,
+        success INTEGER DEFAULT 0,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS accounting_sync_log (
+        id $PK,
+        provider $TXT NOT NULL,
+        entity_type $TXT NOT NULL,
+        entity_id INTEGER NOT NULL,
+        external_id $TXT,
+        action $TXT NOT NULL,
+        status $TXT NOT NULL,
+        response $TXT,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS quote_signatures (
+        id $PK,
+        quote_id INTEGER NOT NULL UNIQUE,
+        signer_name $TXT NOT NULL,
+        signer_email $TXT,
+        signature_data $TXT NOT NULL,
+        consent_text $TXT NOT NULL,
+        ip_address $TXT,
+        user_agent $TXT,
+        signed_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS site_visits (
+        id $PK,
+        title $TXT NOT NULL,
+        visit_date $TXT NOT NULL,
+        visit_time $TXT,
+        lead_id INTEGER,
+        customer_id INTEGER,
+        project_id INTEGER,
+        supplier_id INTEGER,
+        assigned_to INTEGER,
+        notes $TXT,
+        created_by INTEGER,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS notifications_log (
+        id $PK,
+        channel $TXT NOT NULL,
+        recipient $TXT NOT NULL,
+        subject $TXT,
+        entity_type $TXT,
+        entity_id INTEGER,
+        status $TXT NOT NULL,
+        error $TXT,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS job_photos (
+        id $PK,
+        job_assignment_id INTEGER NOT NULL,
+        supplier_id INTEGER NOT NULL,
+        stored_name $TXT NOT NULL,
+        original_name $TXT NOT NULL,
+        caption $TXT,
         created_at $TXT DEFAULT ($NOW)
     )",
 
@@ -350,12 +557,34 @@ function migrate(PDO $pdo): void {
 
     foreach ($tables as $sql) $pdo->exec($sql);
 
+    // Add columns to existing tables that predate them (CREATE TABLE IF NOT EXISTS won't alter live tables)
+    add_column_if_missing($pdo, 'portfolio_projects', 'linked_project_id', 'INTEGER');
+    add_column_if_missing($pdo, 'reviews', 'reply_body', 'TEXT');
+    add_column_if_missing($pdo, 'reviews', 'reply_at', 'TEXT');
+
     // Seed admin user if none exists
     $count = $pdo->query("SELECT COUNT(*) AS c FROM users")->fetch()['c'];
     if ($count == 0) {
         $stmt = $pdo->prepare("INSERT INTO users (name, email, password_hash, role) VALUES (?,?,?,?)");
         $stmt->execute(['Admin', 'admin@m2team.se', password_hash('admin123', PASSWORD_DEFAULT), 'super_admin']);
     }
+}
+
+/**
+ * Adds a column to an existing table if it isn't already there. CREATE TABLE IF NOT EXISTS
+ * only handles brand-new installs — existing tables need an explicit ALTER for new fields.
+ */
+function add_column_if_missing(PDO $pdo, string $table, string $column, string $definition): void {
+    $isMysql = DB_DRIVER === 'mysql';
+    if ($isMysql) {
+        $exists = $pdo->prepare("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?");
+        $exists->execute([$table, $column]);
+        if ((int)$exists->fetchColumn() > 0) return;
+    } else {
+        $cols = $pdo->query("PRAGMA table_info(" . $table . ")")->fetchAll();
+        foreach ($cols as $c) if ($c['name'] === $column) return;
+    }
+    $pdo->exec("ALTER TABLE $table ADD COLUMN $column $definition");
 }
 
 /* ── HELPERS ──────────────────────────────────────────────── */
@@ -395,4 +624,126 @@ function notify_role(string $role, string $title, string $body = '', string $lin
     $users = db()->prepare("SELECT id FROM users WHERE role IN (?, 'super_admin') AND active = 1");
     $users->execute([$role]);
     foreach ($users->fetchAll() as $u) notify($u['id'], $title, $body, $link);
+}
+
+/**
+ * DB-backed login rate limiter. Blocks after $maxAttempts failed attempts within
+ * $windowMinutes, keyed by scope ('crm','portal','leverantor') + identifier (email) + IP.
+ */
+function rate_limit_check(string $scope, string $identifier, int $maxAttempts = 5, int $windowMinutes = 15): bool {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $s = db()->prepare(
+        "SELECT COUNT(*) FROM login_attempts
+         WHERE scope = ? AND (identifier = ? OR ip_address = ?) AND success = 0
+           AND created_at > datetime('now', ?)"
+    );
+    $s->execute([$scope, strtolower(trim($identifier)), $ip, "-{$windowMinutes} minutes"]);
+    return (int)$s->fetchColumn() < $maxAttempts;
+}
+
+function rate_limit_record(string $scope, string $identifier, bool $success): void {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    db()->prepare("INSERT INTO login_attempts (scope, identifier, ip_address, success) VALUES (?,?,?,?)")
+        ->execute([$scope, strtolower(trim($identifier)), $ip, $success ? 1 : 0]);
+    // Opportunistic cleanup of old rows so the table doesn't grow forever
+    if (random_int(1, 50) === 1) {
+        db()->prepare("DELETE FROM login_attempts WHERE created_at < datetime('now','-7 days')")->execute();
+    }
+}
+
+/**
+ * Password reset tokens — shared across all three login types ('crm', 'portal', 'supplier').
+ * Mirrors the existing portal_invites/supplier_invites pattern (random token + expiry + used_at).
+ */
+function create_password_reset_token(string $userType, int $userId, int $expiresMinutes = 60): string {
+    $token   = bin2hex(random_bytes(32));
+    $expires = date('Y-m-d H:i:s', strtotime("+{$expiresMinutes} minutes"));
+    // Invalidate any earlier unused reset requests for this user so only the latest link works.
+    db()->prepare("UPDATE password_resets SET used_at = datetime('now','localtime') WHERE user_type = ? AND user_id = ? AND used_at IS NULL")
+        ->execute([$userType, $userId]);
+    db()->prepare("INSERT INTO password_resets (user_type, user_id, token, expires_at) VALUES (?,?,?,?)")
+        ->execute([$userType, $userId, $token, $expires]);
+    return $token;
+}
+
+function find_password_reset(string $userType, string $token): ?array {
+    if ($token === '') return null;
+    $s = db()->prepare(
+        "SELECT * FROM password_resets WHERE user_type = ? AND token = ? AND used_at IS NULL AND expires_at > datetime('now','localtime')"
+    );
+    $s->execute([$userType, $token]);
+    return $s->fetch() ?: null;
+}
+
+function consume_password_reset(int $resetId): void {
+    db()->prepare("UPDATE password_resets SET used_at = datetime('now','localtime') WHERE id = ?")->execute([$resetId]);
+}
+
+/** Key/value settings store — used for OAuth tokens and other runtime config. */
+function get_setting(string $key, ?string $default = null): ?string {
+    $s = db()->prepare("SELECT svalue FROM settings WHERE skey = ?");
+    $s->execute([$key]);
+    $v = $s->fetchColumn();
+    return $v === false ? $default : $v;
+}
+
+function set_setting(string $key, string $value): void {
+    $isMysql = DB_DRIVER === 'mysql';
+    if ($isMysql) {
+        db()->prepare("INSERT INTO settings (skey, svalue) VALUES (?,?) ON DUPLICATE KEY UPDATE svalue = ?")
+            ->execute([$key, $value, $value]);
+    } else {
+        db()->prepare("INSERT INTO settings (skey, svalue) VALUES (?,?) ON CONFLICT(skey) DO UPDATE SET svalue = ?")
+            ->execute([$key, $value, $value]);
+    }
+}
+
+/**
+ * Preset icon library for services — lets staff pick a service icon from a dropdown
+ * instead of hand-writing SVG paths. Shared between the CRM editor and the public render.
+ */
+function service_icon_presets(): array {
+    return [
+        'roof'    => '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>',
+        'paint'   => '<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>',
+        'wrench'  => '<path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>',
+        'wash'    => '<path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>',
+        'wall'    => '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+        'panel'   => '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+        'balcony' => '<rect x="3" y="11" width="18" height="10" rx="1"/><path d="M3 11V7a2 2 0 012-2h14a2 2 0 012 2v4"/><line x1="12" y1="6" x2="12" y2="11"/>',
+        'ground'  => '<path d="M2 20h20M4 20V10l8-8 8 8v10"/>',
+        'tiles'   => '<rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>',
+        'spray'   => '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>',
+        'shield'  => '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+        'tools'   => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2a2 2 0 110-4h.09A1.65 1.65 0 003.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H8a1.65 1.65 0 001-1.51V2a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V8a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
+    ];
+}
+
+function service_icon_svg(?string $key): string {
+    $presets = service_icon_presets();
+    return $presets[$key] ?? $presets['tools'];
+}
+
+/**
+ * Handles an optional image upload for CRM-managed public content (portfolio, services).
+ * Returns the public URL path to use, or null if no file was uploaded (caller should
+ * fall back to a manually-typed URL in that case). Throws via $error by reference on failure.
+ */
+function handle_public_image_upload(string $fieldName, string $subdir, ?string &$error): ?string {
+    if (empty($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] === UPLOAD_ERR_NO_FILE) return null;
+    $f = $_FILES[$fieldName];
+    $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+    if ($f['error'] !== UPLOAD_ERR_OK) { $error = 'Uppladdningsfel (' . $f['error'] . ').'; return null; }
+    if ($f['size'] > 8_388_608) { $error = 'Bilden är för stor (max 8 MB).'; return null; }
+    if (!in_array(mime_content_type($f['tmp_name']), $allowedMime, true)) { $error = 'Endast JPG, PNG, WEBP eller GIF tillåts.'; return null; }
+
+    $dir = dirname(__DIR__) . '/uploads/' . $subdir . '/';
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+    $ext    = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+    $stored = bin2hex(random_bytes(8)) . '.' . $ext;
+    move_uploaded_file($f['tmp_name'], $dir . $stored);
+
+    return '/uploads/' . $subdir . '/' . $stored;
 }

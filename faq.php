@@ -2,6 +2,7 @@
 $page_title       = 'Vanliga frågor – Tak, Fasad & ROT-avdrag';
 $page_description = 'Svar på vanliga frågor om tak, fasad, priser och ROT-avdrag från M2 Bygg Team AB i Göteborg.';
 $active_page      = '';
+$breadcrumbs      = [['Hem', '/'], ['Vanliga frågor', null]];
 require_once __DIR__ . '/includes/header.php';
 
 $faqs = [
@@ -33,7 +34,16 @@ $faqs = [
     ['Var jobbar ni?', 'Vi är baserade i Hisings Backa, Göteborg, och utför uppdrag i hela Göteborg och Västsverige – Kungsbacka, Mölndal, Kungälv, Lerum, Alingsås, Borås, Trollhättan och alla orter däremellan.'],
   ],
 ];
+
+$faqSchema = [
+    '@context' => 'https://schema.org', '@type' => 'FAQPage',
+    'mainEntity' => array_map(fn($item) => [
+        '@type' => 'Question', 'name' => $item[0],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item[1]],
+    ], array_merge(...array_values($faqs))),
+];
 ?>
+<script type="application/ld+json"><?= json_encode($faqSchema, JSON_UNESCAPED_UNICODE) ?></script>
 
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">
   <a href="/">Hem</a>

@@ -2,6 +2,7 @@
 $page_title = 'Fasadtvätt Göteborg';
 $page_description = 'Professionell fasadtvätt i Göteborg till fast pris. Högtryckstvätt och biocidbehandling mot mögel och alger. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Fasadtvätt Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

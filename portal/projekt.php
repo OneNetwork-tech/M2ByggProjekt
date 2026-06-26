@@ -16,6 +16,38 @@ if ($pid) {
     if (!$project) { header('Location: /portal/projekt.php'); exit; }
 }
 
+// Review submission
+$reviewError = '';
+if ($project && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'submit_review') {
+    $existing = db()->prepare("SELECT id FROM reviews WHERE project_id = ?");
+    $existing->execute([$pid]);
+    if (!in_array($project['status'], ['completed', 'closed'], true)) {
+        $reviewError = 'Recensioner kan endast lämnas för avslutade projekt.';
+    } elseif ($existing->fetch()) {
+        $reviewError = 'Du har redan lämnat en recension för detta projekt.';
+    } else {
+        $rating = max(1, min(5, (int)($_POST['rating'] ?? 5)));
+        $body   = trim($_POST['body'] ?? '');
+        if ($body === '') {
+            $reviewError = 'Skriv en kommentar innan du skickar in din recension.';
+        } else {
+            db()->prepare(
+                "INSERT INTO reviews (project_id, customer_id, portal_user_id, rating, body) VALUES (?,?,?,?,?)"
+            )->execute([$pid, $cid, $pu['id'] ?? null, $rating, $body]);
+            notify_role('support', 'Ny kundrecension', $pu['name'] . ' lämnade en recension (' . $rating . '/5) för "' . $project['title'] . '".', '/crm/recensioner.php');
+            header('Location: /portal/projekt.php?id=' . $pid . '&msg=' . urlencode('Tack för din recension!'));
+            exit;
+        }
+    }
+}
+
+$myReview = null;
+if ($project) {
+    $rs = db()->prepare("SELECT * FROM reviews WHERE project_id = ? AND customer_id = ?");
+    $rs->execute([$pid, $cid]);
+    $myReview = $rs->fetch() ?: null;
+}
+
 // Load timeline for single project
 $timeline = [];
 if ($project) {
@@ -117,6 +149,41 @@ portal_nav('/projekt.php');
       <?php endif; ?>
     </div>
   </div>
+
+  <?php if (in_array($project['status'], ['completed', 'closed'], true)): ?>
+  <div class="card" style="margin-top:20px">
+    <h3 style="margin-bottom:16px">Din recension</h3>
+    <?php if ($myReview): ?>
+      <div class="review-card__stars" style="color:var(--gold);font-size:1.1rem;margin-bottom:8px"><?= str_repeat('★', (int)$myReview['rating']) . str_repeat('☆', 5 - (int)$myReview['rating']) ?></div>
+      <p style="color:var(--steel)">"<?= e($myReview['body']) ?>"</p>
+      <p style="font-size:.8rem;color:var(--steel);margin-top:10px"><?= $myReview['visible'] ? 'Synlig på webbplatsen.' : 'Väntar på publicering / dold av M2.' ?></p>
+      <?php if ($myReview['reply_body']): ?>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--surface);border-radius:8px;border-left:3px solid var(--copper)">
+        <div style="font-size:.78rem;font-weight:600;color:var(--copper);margin-bottom:4px">Svar från M2 Bygg Team</div>
+        <div style="font-size:.85rem;color:var(--steel)"><?= e($myReview['reply_body']) ?></div>
+      </div>
+      <?php endif; ?>
+    <?php else: ?>
+      <?php if ($reviewError): ?><p style="color:#c0392b;margin-bottom:12px"><?= e($reviewError) ?></p><?php endif; ?>
+      <form method="post" style="max-width:480px">
+        <input type="hidden" name="action" value="submit_review">
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:.85rem;color:var(--steel);margin-bottom:6px">Betyg</label>
+          <select name="rating" class="input" style="width:auto">
+            <?php for ($i = 5; $i >= 1; $i--): ?>
+            <option value="<?= $i ?>"><?= str_repeat('★', $i) ?> (<?= $i ?>/5)</option>
+            <?php endfor; ?>
+          </select>
+        </div>
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:.85rem;color:var(--steel);margin-bottom:6px">Din kommentar</label>
+          <textarea name="body" rows="4" class="input" style="width:100%" placeholder="Berätta om din upplevelse..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn--primary">Skicka recension</button>
+      </form>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
 
 <?php else: ?>
   <!-- Project list -->

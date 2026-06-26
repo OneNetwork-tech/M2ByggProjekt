@@ -2,6 +2,7 @@
 $page_title = 'Plåtarbeten Göteborg';
 $page_description = 'Professionella plåtarbeten i Göteborg – hängrännor, stuprör och beslag. Stål, zink, aluminium och koppar. Fast pris. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Plåtarbeten Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

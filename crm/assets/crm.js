@@ -1,6 +1,33 @@
 /* M2 Platform — CRM JS */
 'use strict';
 
+/* Sidebar collapse/expand (state persisted in localStorage) */
+(function () {
+  const btn = document.getElementById('sidebarToggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const collapsed = document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('crm_sidebar_collapsed', collapsed ? '1' : '0');
+  });
+})();
+
+/* Sidebar nav group accordion (state persisted in localStorage, merged with server-rendered active group) */
+(function () {
+  let openGroups = [];
+  try { openGroups = JSON.parse(localStorage.getItem('crm_nav_open_groups') || '[]'); } catch (e) { openGroups = []; }
+  document.querySelectorAll('.nav-group').forEach(g => {
+    if (openGroups.includes(g.dataset.group)) g.classList.add('open');
+  });
+  window.toggleNavGroup = function (id) {
+    const el = document.querySelector('.nav-group[data-group="' + id + '"]');
+    if (!el) return;
+    el.classList.toggle('open');
+    openGroups = openGroups.filter(x => x !== id);
+    if (el.classList.contains('open')) openGroups.push(id);
+    localStorage.setItem('crm_nav_open_groups', JSON.stringify(openGroups));
+  };
+})();
+
 /* Modal helpers */
 window.openModal  = id => document.getElementById(id)?.classList.add('open');
 window.closeModal = id => document.getElementById(id)?.classList.remove('open');

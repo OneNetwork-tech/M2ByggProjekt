@@ -2,6 +2,7 @@
 $page_title = 'Stenläggning Göteborg';
 $page_description = 'Professionell stenläggning i Göteborg till fast pris. Terrass, uppfart och gångvägar i natursten och betongsten. ROT-avdrag. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Stenläggning Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">

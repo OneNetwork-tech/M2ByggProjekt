@@ -1,8 +1,8 @@
 <?php
-$crm_title = 'Användare';
-$crm_page  = 'anvandare';
-require_once __DIR__ . '/includes/crm-header.php';
-require_role([]); // super_admin only
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/mailer.php';
+$me = require_role([]); // super_admin only
 $pdo = db();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -11,14 +11,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'create') {
         $email = strtolower(trim($_POST['email']));
+        $name  = trim($_POST['name']);
         $exists = $pdo->prepare("SELECT id FROM users WHERE email=?"); $exists->execute([$email]);
         if ($exists->fetchColumn()) {
             flash('E-postadressen finns redan.', 'error');
+        } elseif (strlen($_POST['password'] ?? '') < 8) {
+            flash('Lösenordet måste vara minst 8 tecken.', 'error');
         } else {
             $pdo->prepare("INSERT INTO users (name,email,password_hash,role,phone) VALUES (?,?,?,?,?)")
-                ->execute([trim($_POST['name']), $email, password_hash($_POST['password'], PASSWORD_DEFAULT), $_POST['role'], trim($_POST['phone'] ?? '')]);
-            audit('user_create', 'user', $pdo->lastInsertId());
-            flash('Användare skapad.');
+                ->execute([$name, $email, password_hash($_POST['password'], PASSWORD_DEFAULT), $_POST['role'], trim($_POST['phone'] ?? '')]);
+            $newId = (int)$pdo->lastInsertId();
+            audit('user_create', 'user', $newId);
+
+            if (!empty($_POST['send_welcome'])) {
+                $token = create_password_reset_token('crm', $newId, 60 * 24 * 7); // 7 days, like the supplier/portal invite links
+                $setUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/crm/reset-password.php?token=' . $token;
+                $sent = crm_send_mail(
+                    $email, $name,
+                    'Välkommen till M2 Platform!',
+                    '<p>Hej ' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '!</p><p>Du har fått ett konto i M2 Platform med rollen <strong>' . htmlspecialchars(ROLES[$_POST['role']] ?? $_POST['role'], ENT_QUOTES, 'UTF-8') . '</strong>.</p><p>Klicka på knappen nedan för att välja ditt eget lösenord och logga in. Länken är giltig i 7 dagar.</p>',
+                    'user', $newId, $setUrl, 'Sätt mitt lösenord'
+                );
+                flash($sent ? 'Användare skapad och välkomstmejl skickat.' : 'Användare skapad, men välkomstmejlet kunde inte skickas (kontrollera SMTP-inställningar).', $sent ? 'success' : 'error');
+            } else {
+                flash('Användare skapad.');
+            }
         }
         header('Location: anvandare.php'); exit;
     }
@@ -57,6 +74,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $users = $pdo->query("SELECT * FROM users ORDER BY created_at")->fetchAll();
+
+$crm_title = 'Användare';
+$crm_page  = 'anvandare';
+require_once __DIR__ . '/includes/crm-header.php';
 ?>
 
 <div class="topbar">
@@ -149,6 +170,9 @@ $users = $pdo->query("SELECT * FROM users ORDER BY created_at")->fetchAll();
         </div>
         <div class="fg"><label>Lösenord * (min 8)</label><input class="fi" type="text" name="password" minlength="8" required></div>
       </div>
+      <div class="fg"><label style="display:flex;align-items:center;gap:8px;font-weight:500">
+        <input type="checkbox" name="send_welcome" value="1" checked> Skicka välkomstmejl med länk för att sätta eget lösenord
+      </label></div>
       <div style="display:flex;gap:10px;justify-content:flex-end">
         <button type="button" class="btn btn--ghost" onclick="closeModal('newUserModal')">Avbryt</button>
         <button class="btn btn--primary">Skapa</button>

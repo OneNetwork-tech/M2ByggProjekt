@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/layout.php';
+require_once dirname(__DIR__) . '/crm/includes/mailer.php';
 $pu  = portal_require();
 $cid = (int)$pu['customer_id'];
 
@@ -18,9 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['body'])) {
         db()->prepare(
             "INSERT INTO portal_messages (project_id, sender_type, sender_id, body) VALUES (?,?,?,?)"
         )->execute([$pid, 'customer', $cid, $body]);
-        // Notify CRM staff
-        notify_role('support', 'Nytt kundmeddelande',
-            $pu['name'] . ' skickade ett meddelande.', '/crm/meddelanden.php');
+        // Notify CRM staff in-app + email
+        notify_role_email('support', 'Nytt kundmeddelande',
+            $pu['name'] . ' skickade ett meddelande: "' . mb_strimwidth($body, 0, 100, '…') . '"',
+            'meddelanden.php?view=portal&thread=' . $pid, 'project', $pid);
         header('Location: /portal/meddelanden.php?project=' . $pid);
         exit;
     }

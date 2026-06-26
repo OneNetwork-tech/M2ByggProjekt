@@ -4,5 +4,9 @@ Allow: /
 Disallow: /send/
 Disallow: /vendor/
 Disallow: /includes/
+Disallow: /crm/
+Disallow: /portal/
+Disallow: /leverantor/
+Disallow: /data/
 
 Sitemap: https://www.m2team.se/sitemap.xml

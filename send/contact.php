@@ -22,6 +22,14 @@ if (!empty($origin) && strpos($origin, 'm2team.se') === false && strpos($origin,
 }
 
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/../crm/includes/db.php';
+
+if (!rate_limit_check('contact_form', $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', 8, 10)) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'message' => 'För många förfrågningar. Försök igen om en stund eller ring oss direkt.']);
+    exit;
+}
+rate_limit_record('contact_form', $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', false);
 
 $fname    = post('fname');
 $lname    = post('lname');

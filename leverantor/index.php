@@ -33,32 +33,32 @@ $s = db()->prepare("
 $s->execute([$sid]);
 $recentReports = $s->fetchAll();
 
-supp_head('Dashboard', $su);
+supp_head(t('nav.dashboard'), $su);
 supp_nav('/');
 ?>
 <main class="portal-main">
   <div class="portal-page-title">
-    <h1>Välkommen, <?= e($su['company']) ?>!</h1>
-    <p>Här är en översikt av dina uppdrag och rapporter.</p>
+    <h1><?= e(sprintf(t('dash.supplier_welcome'), $su['company'])) ?></h1>
+    <p><?= e(t('dash.supplier_overview')) ?></p>
   </div>
 
   <!-- Stats -->
   <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px">
     <div class="stat-card">
       <div class="stat-card__value"><?= (int)$pending ?></div>
-      <div class="stat-card__label">Väntande erbjudanden</div>
+      <div class="stat-card__label"><?= e(t('dash.pending_offers')) ?></div>
     </div>
     <div class="stat-card">
       <div class="stat-card__value"><?= (int)$active ?></div>
-      <div class="stat-card__label">Aktiva uppdrag</div>
+      <div class="stat-card__label"><?= e(t('dash.active_jobs')) ?></div>
     </div>
     <div class="stat-card">
       <div class="stat-card__value"><?= (int)$completed ?></div>
-      <div class="stat-card__label">Genomförda uppdrag</div>
+      <div class="stat-card__label"><?= e(t('dash.completed_jobs')) ?></div>
     </div>
     <div class="stat-card">
       <div class="stat-card__value"><?= number_format((float)$unpaidAmt, 0, ',', ' ') ?> kr</div>
-      <div class="stat-card__label">Obetalt belopp</div>
+      <div class="stat-card__label"><?= e(t('dash.unpaid_amount')) ?></div>
     </div>
   </div>
 

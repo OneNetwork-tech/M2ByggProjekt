@@ -2,6 +2,7 @@
 $page_title = 'Takbyte Göteborg';
 $page_description = 'Professionellt takbyte i Göteborg till fast pris. Tegeltak, betongtak, plåttak. ROT-avdrag. 5 år garanti. M2 Bygg Team AB.';
 $active_page = 'tjanster';
+$breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Takbyte Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="breadcrumb"><div class="container"><div class="breadcrumb__inner">
@@ -12,7 +13,7 @@ require_once __DIR__ . '/../includes/header.php';
   <span>Takbyte Göteborg</span>
 </div></div></div>
 <section class="hero" style="padding:80px 0 70px">
-  <div class="hero__bg" style="background-image:url('https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=1600&q=80')"></div>
+  <div class="hero__bg" style="background-image:url('')"></div>
   <div class="hero__overlay"></div>
   <div class="container hero__content">
     <div style="max-width:600px">
@@ -45,7 +46,7 @@ require_once __DIR__ . '/../includes/header.php';
   <div class="container">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:68px;align-items:center">
       <div class="reveal">
-        <img src="https://images.unsplash.com/photo-1632207691143-643e2a9a9361?w=1600&q=80" alt="Takbyte Göteborg Göteborg" loading="lazy" style="width:100%;height:460px;object-fit:cover;border-radius:var(--r-xl);box-shadow:var(--shadow-xl)">
+        <img src="/uploads/tak_byte.jpg" alt="Takbyte Göteborg Göteborg" loading="lazy" style="width:100%;height:460px;object-fit:cover;border-radius:var(--r-xl);box-shadow:var(--shadow-xl)">
       </div>
       <div class="reveal">
         <span class="price-badge" style="margin-bottom:16px">från 900 kr/m²</span>

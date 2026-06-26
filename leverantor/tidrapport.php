@@ -40,6 +40,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         db()->prepare(
             "INSERT INTO time_reports (supplier_id, job_assignment_id, project_id, report_date, hours, amount, description) VALUES (?,?,?,?,?,?,?)"
         )->execute([$sid, $jobId, $row['project_id'], $date, $hours, $amount, $desc]);
+
+        // Optional attached photo (e.g. completed work, materials used)
+        if (!empty($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+            $f = $_FILES['photo'];
+            $allowedMime = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+            if ($f['size'] <= 15_728_640 && in_array(mime_content_type($f['tmp_name']), $allowedMime)) {
+                $dir = dirname(__DIR__) . '/data/portal-uploads/job-photos/';
+                if (!is_dir($dir)) mkdir($dir, 0750, true);
+                $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION)) ?: 'jpg';
+                $stored = 'job' . $jobId . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                move_uploaded_file($f['tmp_name'], $dir . $stored);
+                db()->prepare(
+                    "INSERT INTO job_photos (job_assignment_id, supplier_id, stored_name, original_name, caption) VALUES (?,?,?,?,?)"
+                )->execute([$jobId, $sid, $stored, $f['name'], 'Tidrapport ' . $date]);
+            }
+        }
+
         $success = 'Tidrapporten har sparats.';
     }
 }
@@ -75,7 +92,7 @@ supp_nav('/tidrapport.php');
       <div style="padding:20px">
         <?php if ($error): ?><div class="alert alert--error" style="margin-bottom:16px"><?= e($error) ?></div><?php endif; ?>
         <?php if ($success): ?><div class="alert alert--success" style="margin-bottom:16px"><?= e($success) ?></div><?php endif; ?>
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
           <div class="form-group">
             <label class="form-label">Uppdrag</label>
             <select class="form-control" name="job_id" required>
@@ -102,6 +119,10 @@ supp_nav('/tidrapport.php');
           <div class="form-group">
             <label class="form-label">Beskrivning</label>
             <textarea class="form-control" name="description" rows="3" placeholder="Vad utfördes?"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bild (valfritt)</label>
+            <input class="form-control" type="file" name="photo" accept="image/*" capture="environment" style="padding:8px">
           </div>
           <button type="submit" class="btn btn--primary">Spara rapport</button>
         </form>

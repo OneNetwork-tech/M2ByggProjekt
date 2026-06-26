@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/mailer.php';
 $me = require_login();
 $pdo = db();
 
@@ -26,7 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // AUTOMATION: Project Completed → Request Review (per blueprint)
             if ($status === 'completed') {
                 log_timeline('project', $id, 'system', 'Automation: Be kunden om recension', 'Skicka recensionsförfrågan till ' . ($proj['customer_email'] ?: 'kunden'), $me['id']);
-                notify_role('support', 'Be om recension: ' . $proj['title'], 'Projektet är slutfört – dags att be kunden om en Google-recension.', "projekt-detalj.php?id=$id");
+                notify_role('support', 'Be om recension: ' . $proj['title'], 'Projektet är slutfört – dags att be kunden om en recension.', "projekt-detalj.php?id=$id");
+
+                if (!empty($proj['customer_email'])) {
+                    $portalUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'm2team.se') . '/portal/projekt.php?id=' . $id;
+                    crm_send_mail(
+                        $proj['customer_email'], $proj['customer_name'] ?: $proj['customer_email'],
+                        'Tack för att du valde M2 Bygg Team!',
+                        '<p>Hej ' . htmlspecialchars($proj['customer_name'] ?? '', ENT_QUOTES, 'UTF-8') . '!</p><p>Ditt projekt <strong>' . htmlspecialchars($proj['title'], ENT_QUOTES, 'UTF-8') . '</strong> är nu slutfört. Vi hoppas att du är nöjd med resultatet!</p><p>Vi skulle bli väldigt glada om du tog en minut att lämna en recension i kundportalen – den visas på vår webbplats och hjälper andra kunder att hitta oss.</p>',
+                        'project', $id, $portalUrl, 'Lämna en recension'
+                    );
+                }
             }
             flash('Status uppdaterad.');
         }
@@ -64,6 +75,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: projekt-detalj.php?id=$id"); exit;
     }
 
+    if ($action === 'rate_supplier') {
+        $jaId    = (int)($_POST['job_assignment_id'] ?? 0);
+        $rating  = max(1, min(5, (int)($_POST['rating'] ?? 5)));
+        $note    = trim($_POST['note'] ?? '');
+        $ja = $pdo->prepare("SELECT * FROM job_assignments WHERE id = ? AND project_id = ?");
+        $ja->execute([$jaId, $id]);
+        $jaRow = $ja->fetch();
+        if ($jaRow) {
+            $existing = $pdo->prepare("SELECT id FROM supplier_ratings WHERE job_assignment_id = ?");
+            $existing->execute([$jaId]);
+            if ($existing->fetchColumn()) {
+                $pdo->prepare("UPDATE supplier_ratings SET rating=?, note=?, rated_by=?, created_at=datetime('now','localtime') WHERE job_assignment_id=?")
+                    ->execute([$rating, $note, $me['id'], $jaId]);
+            } else {
+                $pdo->prepare("INSERT INTO supplier_ratings (job_assignment_id, supplier_id, project_id, rating, note, rated_by) VALUES (?,?,?,?,?,?)")
+                    ->execute([$jaId, $jaRow['supplier_id'], $id, $rating, $note, $me['id']]);
+            }
+            // Keep suppliers.rating in sync as a running average across all rated jobs
+            $avg = $pdo->prepare("SELECT AVG(rating) FROM supplier_ratings WHERE supplier_id = ?");
+            $avg->execute([$jaRow['supplier_id']]);
+            $pdo->prepare("UPDATE suppliers SET rating = ? WHERE id = ?")->execute([round((float)$avg->fetchColumn(), 2), $jaRow['supplier_id']]);
+            audit('supplier_rate', 'job_assignment', $jaId, (string)$rating);
+            flash('Betyg sparat.');
+        }
+        header("Location: projekt-detalj.php?id=$id"); exit;
+    }
+
     if ($action === 'note') {
         log_timeline('project', $id, $_POST['type'] ?? 'note', trim($_POST['title']), trim($_POST['body'] ?? ''), $me['id']);
         flash('Sparad.');
@@ -76,8 +114,11 @@ $tl->execute([$id]); $timeline = $tl->fetchAll();
 $suppliers = $pdo->query("SELECT id, company FROM suppliers WHERE status IN ('verified','active') ORDER BY company")->fetchAll();
 
 $s = $pdo->prepare("
-    SELECT ja.*, s.company AS supplier_company
+    SELECT ja.*, s.company AS supplier_company,
+           (SELECT COUNT(*) FROM job_photos jp WHERE jp.job_assignment_id = ja.id) AS photo_count,
+           sr.rating AS my_rating, sr.note AS my_rating_note
     FROM job_assignments ja JOIN suppliers s ON s.id=ja.supplier_id
+    LEFT JOIN supplier_ratings sr ON sr.job_assignment_id = ja.id
     WHERE ja.project_id=? ORDER BY ja.created_at DESC
 ");
 $s->execute([$id]); $jobAssignments = $s->fetchAll();
@@ -107,6 +148,7 @@ require_once __DIR__ . '/includes/crm-header.php';
   <div class="topbar__actions">
     <?php if ($proj['quote_id']): ?><a href="offert.php?id=<?= $proj['quote_id'] ?>" class="btn btn--ghost">Visa offert</a><?php endif; ?>
     <?php if ($proj['customer_id']): ?><a href="kund.php?id=<?= $proj['customer_id'] ?>" class="btn btn--ghost">Visa kund</a><?php endif; ?>
+    <a href="kalender.php?project=<?= $id ?>" class="btn btn--ghost">📅 Boka besök</a>
     <a href="portal-dokument.php?project=<?= $id ?>" class="btn btn--ghost" title="Ladda upp till kundportal">📎 Portal dok.</a>
     <a href="meddelanden.php?view=portal" class="btn btn--ghost" title="Kundportal-meddelanden">💬 Portal msg</a>
   </div>
@@ -262,8 +304,17 @@ require_once __DIR__ . '/includes/crm-header.php';
         <div>
           <div style="font-weight:550"><?= e($ja['supplier_company']) ?></div>
           <?php if ($ja['crm_note']): ?><div style="font-size:11.5px;color:var(--gray)"><?= e(mb_strimwidth($ja['crm_note'],0,60,'…')) ?></div><?php endif; ?>
+          <?php if ($ja['photo_count']): ?><a href="leverantor-foton.php?job=<?= $ja['id'] ?>" style="font-size:11px;color:var(--blue)">📷 <?= $ja['photo_count'] ?> bild<?= $ja['photo_count']>1?'er':'' ?></a><?php endif; ?>
+          <?php if ($ja['my_rating']): ?><div style="font-size:11px;color:#D97706;margin-top:2px"><?= str_repeat('★', (int)$ja['my_rating']) . str_repeat('☆', 5 - (int)$ja['my_rating']) ?></div><?php endif; ?>
         </div>
-        <span style="font-size:11px;font-weight:600;color:<?= $jaColors[$ja['status']] ?? '#999' ?>;background:<?= $jaColors[$ja['status']] ?? '#999' ?>18;padding:3px 8px;border-radius:20px"><?= $jaLabels[$ja['status']] ?? $ja['status'] ?></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;font-weight:600;color:<?= $jaColors[$ja['status']] ?? '#999' ?>;background:<?= $jaColors[$ja['status']] ?? '#999' ?>18;padding:3px 8px;border-radius:20px"><?= $jaLabels[$ja['status']] ?? $ja['status'] ?></span>
+          <?php if ($ja['status'] === 'completed'): ?>
+          <a href="#" onclick="event.preventDefault();openRatingModal(<?= $ja['id'] ?>, <?= (int)($ja['my_rating'] ?: 5) ?>, <?= htmlspecialchars(json_encode($ja['my_rating_note']), ENT_QUOTES) ?>)" style="font-size:11px">
+            <?= $ja['my_rating'] ? 'Ändra betyg' : 'Betygsätt' ?>
+          </a>
+          <?php endif; ?>
+        </div>
       </div>
       <?php endforeach; ?>
       <div style="margin-top:10px"></div>
@@ -303,5 +354,35 @@ require_once __DIR__ . '/includes/crm-header.php';
 
   </div>
 </div>
+
+<div class="modal-bg" id="ratingModal">
+  <div class="modal">
+    <h3>Betygsätt leverantörens arbete</h3>
+    <form method="post">
+      <?= csrf_field() ?><input type="hidden" name="action" value="rate_supplier"><input type="hidden" name="job_assignment_id" id="sr_ja_id" value="">
+      <div class="fg"><label>Betyg</label>
+        <select class="fs" name="rating" id="sr_rating">
+          <?php for ($i = 5; $i >= 1; $i--): ?><option value="<?= $i ?>"><?= str_repeat('★', $i) ?> (<?= $i ?>/5)</option><?php endfor; ?>
+        </select>
+      </div>
+      <div class="fg"><label>Anteckning (intern, ej synlig för leverantören)</label>
+        <textarea class="fi" name="note" id="sr_note" rows="3" placeholder="T.ex. kvalitet, punktlighet, kommunikation..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn btn--ghost" onclick="closeModal('ratingModal')">Avbryt</button>
+        <button class="btn btn--primary">Spara betyg</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openRatingModal(jaId, rating, note) {
+  document.getElementById('sr_ja_id').value = jaId;
+  document.getElementById('sr_rating').value = rating;
+  document.getElementById('sr_note').value = note || '';
+  openModal('ratingModal');
+}
+</script>
 
 <?php require_once __DIR__ . '/includes/crm-footer.php'; ?>
