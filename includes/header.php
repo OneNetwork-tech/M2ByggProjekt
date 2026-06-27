@@ -91,7 +91,7 @@ $schemaTopReviews  = $schemaReviewCount > 0 ? db()->query(
   <?php
   $schemaGraph = [
       ['@type' => 'Organization', '@id' => $base_url . '/#organization', 'name' => $site_name, 'url' => $base_url,
-       'logo' => $base_url . '/assets/images/logo.png',
+       'logo' => $base_url . '/assets/images/logo.avif',
        'sameAs' => array_values(array_filter([$instagram ?? null, $facebook ?? null])),
        'contactPoint' => ['@type' => 'ContactPoint', 'telephone' => $phone1_raw ? '+46' . ltrim($phone1_raw, '0') : null,
                            'contactType' => 'customer service', 'areaServed' => 'SE', 'availableLanguage' => ['sv', 'en']]],
@@ -153,7 +153,7 @@ $schemaTopReviews  = $schemaReviewCount > 0 ? db()->query(
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/images/logo.png">
+  <link rel="apple-touch-icon" href="/assets/images/logo.avif">
   <link rel="manifest" href="/site.webmanifest">
 
   <?php if (defined('GA4_MEASUREMENT_ID')): ?>
@@ -178,7 +178,7 @@ $schemaTopReviews  = $schemaReviewCount > 0 ? db()->query(
 
       <!-- Logo: "m2 / BYGG / TEAM" matching reference exactly -->
       <a href="/" class="nav__logo" aria-label="M2 Bygg Team – Startsida" style="display: inline-flex; align-items: center; text-decoration: none;">
-  <img src="/assets/images/logo.avif" alt="M2 Bygg Team" style="display: block; max-height: 40px; width: auto; height: auto;">
+  <img src="/assets/images/logo.png" alt="M2 Bygg Team" style="display: block; max-height: 40px; width: auto; height: auto;">
 </a>
 
       <!-- Desktop links -->
