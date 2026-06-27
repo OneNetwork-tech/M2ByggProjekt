@@ -6,8 +6,9 @@
       <!-- Brand -->
       <div>
         <div class="footer__logo">
-          <span class="footer__logo-mark">m2</span>
-          <div class="footer__logo-sub"><span>Bygg</span><span>Team</span></div>
+          <a href="/" class="nav__logo" aria-label="M2 Bygg Team – Startsida" style="display: inline-flex; align-items: center; text-decoration: none;">
+  <img src="/assets/images/logo.png" alt="M2 Bygg Team" style="display: block; max-height: 40px; width: auto; height: auto;">
+</a>
         </div>
         <p class="footer__desc">Professionella tak- och fasadarbeten i Göteborg och Västsverige. Fast pris, ROT-avdrag och 5 år garanti på allt vi utför.</p>
         <div class="footer__social">
