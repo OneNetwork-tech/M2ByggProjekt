@@ -1,10 +1,10 @@
 ---
 # M2 Platform — cPanel Git Version Control deployment
 # Triggered automatically on "Pull or Deploy" in cPanel → Git Version Control.
-# DEPLOYPATH must match your account, e.g. /home/m2team/public_html/
+# DEPLOYPATH must match your account's home directory + public_html.
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/m2team/public_html/
+    - export DEPLOYPATH=/home/mteamse/public_html/
     # Sync everything except git/dev files. Keeps live database + uploads.
     - /bin/cp -R 404.php 500.php bli-partner.php faq.php fastighet.php index.php integritetspolicy.php kontakt.php offert.php om-oss.php prisguide.php projekt.php sitemap.php $DEPLOYPATH
     - /bin/cp -R .htaccess composer.json robots.txt $DEPLOYPATH

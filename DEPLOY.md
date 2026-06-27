@@ -99,11 +99,11 @@ git push
 
 ## STEG 3 — Deploya till cPanel
 
-Två metoder. **Välj EN.** Metod A rekommenderas (inga lösenord i GitHub).
+Via cPanel Git Version Control — inga FTP-lösenord i GitHub.
 
 \---
 
-### METOD A — cPanel Git Version Control (rekommenderad)
+### cPanel Git Version Control
 
 cPanel klonar repot direkt från GitHub och kör `.cpanel.yml` vid varje deploy.
 
@@ -140,39 +140,6 @@ Committa och pusha ändringen.
 Vid varje ny ändring: `git push` → upprepa steg A.4. Klart.
 
 > `.cpanel.yml` skriver \*\*aldrig\*\* över den skarpa databasen eller uppladdningar.
-
-\---
-
-### METOD B — GitHub Actions (helautomatisk FTP)
-
-Varje `git push` till `main` syntaxkollar all PHP och FTP:ar automatiskt till cPanel.
-
-#### B.1 Skapa FTP-konto i cPanel
-
-cPanel → **FTP Accounts** → Create:
-
-* Användare: `deploy@m2team.se`
-* Directory: `public\_html`
-* Starkt lösenord
-
-#### B.2 Lägg in secrets i GitHub
-
-Repo → **Settings → Secrets and variables → Actions → New repository secret:**
-
-|Secret|Värde|
-|-|-|
-|`FTP\_SERVER`|`ftp.m2team.se` (visas i cPanel → FTP Accounts)|
-|`FTP\_USERNAME`|`deploy@m2team.se`|
-|`FTP\_PASSWORD`|lösenordet|
-
-#### B.3 Klart
-
-Workflowen `.github/workflows/deploy.yml` finns redan. Varje `git push`:
-
-1. ✅ Syntaxkollar alla PHP-filer (stoppar trasig kod)
-2. 🚀 Laddar upp ändrade filer via FTP (databas + uploads exkluderas)
-
-Följ körningar under fliken **Actions** i GitHub.
 
 \---
 
@@ -226,8 +193,8 @@ och i `mailer.php` läs: `defined('SMTP\_PASS\_OVERRIDE') ? SMTP\_PASS\_OVERRIDE
 |CRM: "could not find driver"|cPanel → Select PHP Version → aktivera `pdo\_sqlite` (eller `pdo\_mysql`)|
 |CRM: databas-fel|`/data/` ej skrivbar → chmod 755, kontrollera ägare|
 |Mejl skickas inte|Fel SMTP-lösenord i `send/mailer.php`, eller port 465 blockerad → testa 587/TLS|
-|GitHub Actions misslyckas|Kontrollera secrets-stavning, FTP-quota, server-dir `/public\_html/`|
 |cPanel deploy gör inget|`.cpanel.yml` har fel DEPLOYPATH, eller okommittade ändringar i cPanel-repot|
+|"Update from Remote" hämtar inget nytt|SSH-deploy-nyckeln saknas/fel i GitHub → repo Settings → Deploy keys|
 
 
 
