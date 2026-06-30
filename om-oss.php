@@ -1,6 +1,6 @@
 <?php
 $page_title       = 'Om oss – Lokala hantverkare i Göteborg';
-$page_description = 'M2 Bygg Team AB – Lokalt förankrat byggföretag i Hisings Backa. Fast pris, 5 år garanti, 1 000+ nöjda kunder. Läs om oss.';
+$page_description = 'M2 Bygg Team AB – Lokalt förankrat byggföretag i Hisings Backa. Fast pris, 1 000+ nöjda kunder. Läs om oss.';
 $active_page      = 'om-oss';
 $breadcrumbs      = [['Hem', '/'], ['Om oss', null]];
 require_once __DIR__ . '/includes/header.php';
@@ -73,7 +73,7 @@ require_once __DIR__ . '/includes/header.php';
           <?php
           $milestones = [
             ['icon'=>'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>','h'=>'Fast pris – alltid','p'=>'Du vet priset innan vi börjar. Prisgaranti ingår i varje offert.'],
-            ['icon'=>'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>','h'=>'5 år garanti','p'=>'Vi ger 5 år garanti på allt arbete. Uppstår problem åtgärdar vi det kostnadsfritt.'],
+            ['icon'=>'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>','h'=>'Nöjd kund-garanti','p'=>'Uppstår problem till följd av vårt arbete åtgärdar vi det kostnadsfritt.'],
             ['icon'=>'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>','h'=>'1 000+ nöjda kunder','p'=>'Mer än 1 000 kunder i Göteborg och Västsverige – och de flesta rekommenderar oss vidare.'],
           ];
           foreach ($milestones as $m): ?>
@@ -178,7 +178,7 @@ require_once __DIR__ . '/includes/header.php';
             ['<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>','Försäkrad verksamhet','Fullständig ansvarsförsäkring'],
             ['<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>','Certifierade hantverkare','Yrkescertifierade inom alla specialområden'],
             ['<path d="M9 14l6-6M9.5 8.5a.5.5 0 110-1 .5.5 0 010 1zm5 5a.5.5 0 110-1 .5.5 0 010 1z"/><rect x="3" y="3" width="18" height="18" rx="3"/>','ROT-godkänd','Registrerade hos Skatteverket'],
-            ['<path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3"/>','5 år garanti','På allt utfört arbete'],
+            ['<path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3"/>','Kostnadsfri offert','Svar inom 24h'],
           ];
           foreach ($certs as $c): ?>
           <div class="reveal" style="background:var(--sand-lt);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;text-align:center">

@@ -38,7 +38,7 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 </section>
 <div class="trust-strip"><div class="container"><div class="trust-strip__grid">
-<?php foreach([['Fast pris','Prisgaranti alltid'],['ROT-avdrag','Vi hanterar ansökan'],['5 år garanti','På allt arbete'],['Svar inom 24h','Gratis besiktning']] as $t): ?>
+<?php foreach([['Fast pris','Prisgaranti alltid'],['ROT-avdrag','Vi hanterar ansökan'],['Svar inom 24h','Gratis besiktning']] as $t): ?>
 <div class="trust-item"><div class="trust-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="trust-item__text"><strong><?=$t[0]?></strong><span><?=$t[1]?></span></div></div>
 <?php endforeach; ?>
 </div></div></div>
@@ -53,7 +53,7 @@ require_once __DIR__ . '/../includes/header.php';
         <h2 style="margin-bottom:12px">Snabb och diskret service</h2>
         <p style="color:var(--steel);line-height:1.72;margin-bottom:28px">Vi agerar snabbt. Klotter som åtgärdas inom 24–48 timmar ger lägre risk för återfall och är enklare att ta bort. Kontakta oss direkt.</p>
         <div style="display:flex;flex-direction:column;gap:14px" class="reveal-group">
-<?php foreach([['Fast pris alltid','Det pris vi offererar är det du betalar. Prisgaranti ingår.'],['5 år garanti','Allt arbete täcks av 5 år garanti. Uppstår problem åtgärdar vi kostnadsfritt.'],['ROT-avdrag','30% av arbetskostnaden tillbaka. Vi hanterar ansökan till Skatteverket.']] as $i=>[$h,$p]): ?>
+<?php foreach([['Fast pris alltid','Det pris vi offererar är det du betalar. Prisgaranti ingår.'],['ROT-avdrag','30% av arbetskostnaden tillbaka. Vi hanterar ansökan till Skatteverket.']] as $i=>[$h,$p]): ?>
 <div class="reveal" style="display:flex;gap:13px;align-items:flex-start">
   <div style="min-width:34px;height:34px;background:rgba(181,113,42,.1);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--copper)">0<?=$i+1?></div>
   <div><h4 style="margin-bottom:3px"><?=$h?></h4><p style="font-size:14px;color:var(--steel);line-height:1.6"><?=$p?></p></div>

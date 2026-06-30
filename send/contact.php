@@ -60,6 +60,7 @@ $name = safe($fname) . ' ' . safe($lname);
 
 /* ════════ CRM AUTOMATION: create lead ════════ */
 $leadNo = null;
+$leadCreated = false;
 try {
     require_once __DIR__ . '/../crm/includes/db.php';
     $leadNo = next_number('L', 'leads', 'lead_no');
@@ -71,6 +72,7 @@ try {
         ->execute([$leadNo, trim($fname . ' ' . $lname), trim($email), trim($phone), trim($city), trim($service),
                    $source ?: 'Webbformulär', $msgFull]);
     $leadId = db()->lastInsertId();
+    $leadCreated = true;
     log_timeline('lead', $leadId, 'system', 'Lead inkom via webbformulär', 'Källa: ' . ($source ?: 'Webbformulär'));
     notify_role('sales', 'Ny lead: ' . trim($fname . ' ' . $lname), $service . ($city ? ' i ' . $city : ''), 'lead.php?id=' . $leadId);
 } catch (Throwable $ex) {
@@ -79,7 +81,7 @@ try {
 }
 
 /* ════════ EMAIL via SMTP ════════ */
-$subject = "Offertförfrågan från {$name} – " . safe($service) . ($leadNo ? " ($leadNo)" : '');
+$subject = "Offertförfrågan från {$name} - " . safe($service) . ($leadNo ? " ($leadNo)" : '');
 
 $body = '';
 $fields = [
@@ -101,10 +103,13 @@ if (!empty($message)) {
     $body .= "<div class=\"field\"><div class=\"label\">Meddelande</div><div class=\"value\" style=\"white-space:pre-line\">" . safe($message) . "</div></div>";
 }
 
-$result = sendMail($subject, $body, !empty($email) ? $email : null, $name);
+$emailResult = sendMail($subject, $body, !empty($email) ? $email : null, $name);
+if (!$emailResult['success']) {
+    error_log('Contact form staff-notification email failed: ' . ($emailResult['message'] ?? 'unknown error'));
+}
 
 // Auto-reply to customer
-if ($result['success'] && !empty($email)) {
+if ($emailResult['success'] && !empty($email)) {
     $autoBody = "
     <div class=\"field\"><div class=\"value\">
       Hej {$name},<br><br>
@@ -117,4 +122,11 @@ if ($result['success'] && !empty($email)) {
     sendMail('Vi har tagit emot din förfrågan – M2 Bygg Team AB', $autoBody, MAIL_TO, SMTP_FROM_NAME);
 }
 
-echo json_encode($result);
+// The customer-facing result reflects whether their submission was actually captured
+// (lead saved to the CRM), not just whether the internal staff-notification email went
+// out — a temporary SMTP outage shouldn't make a real lead look like a failed submission.
+if ($leadCreated || $emailResult['success']) {
+    echo json_encode(['success' => true, 'message' => 'Tack! Vi har tagit emot din förfrågan och återkommer inom 24 timmar.']);
+} else {
+    echo json_encode($emailResult);
+}

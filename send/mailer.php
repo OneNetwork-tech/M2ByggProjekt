@@ -26,7 +26,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/../crm/includes/db.php';
+
 // ── SMTP CREDENTIALS ──────────────────────────────────────────
+// Default account is configured in crm/installningar.php (stored in the email_accounts
+// table). These constants are only a fallback for when no account has been set up yet.
 define('SMTP_HOST',     'mail.m2team.se');
 define('SMTP_PORT',     465);
 define('SMTP_USER',     'noreply@m2team.se');
@@ -36,6 +40,8 @@ define('SMTP_USER',     'noreply@m2team.se');
 define('SMTP_PASS', defined('SMTP_PASS_OVERRIDE') ? SMTP_PASS_OVERRIDE : 'PASSWORD');
 define('SMTP_FROM',     'noreply@m2team.se');
 define('SMTP_FROM_NAME','M2 Bygg Team AB');
+
+$_send_mailer_account = get_default_email_account();
 define('MAIL_TO',       'info@m2team.se');      // where form emails land
 define('MAIL_TO_NAME',  'M2 Bygg Team AB');
 
@@ -50,17 +56,27 @@ define('MAIL_TO_NAME',  'M2 Bygg Team AB');
  */
 function sendMail(string $subject, string $htmlBody, ?string $replyTo = null, ?string $replyName = null): array
 {
+    global $_send_mailer_account;
+    $account  = $_send_mailer_account;
+    $host     = $account['host']       ?? SMTP_HOST;
+    $port     = (int)($account['port'] ?? SMTP_PORT);
+    $username = $account['username']   ?? SMTP_USER;
+    $password = $account['password']   ?? SMTP_PASS;
+    $fromMail = $account['from_email'] ?? SMTP_FROM;
+    $fromName = $account['from_name']  ?? SMTP_FROM_NAME;
+    $enc      = $account['encryption'] ?? 'ssl';
+
     $mail = new PHPMailer(true);
 
     try {
         // Server config
         $mail->isSMTP();
-        $mail->Host       = SMTP_HOST;
+        $mail->Host       = $host;
         $mail->SMTPAuth   = true;
-        $mail->Username   = SMTP_USER;
-        $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;   // SSL on port 465
-        $mail->Port       = SMTP_PORT;
+        $mail->Username   = $username;
+        $mail->Password   = $password;
+        $mail->SMTPSecure = $enc === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port       = $port;
         $mail->CharSet    = 'UTF-8';
         $mail->Encoding   = 'base64';
 
@@ -68,7 +84,7 @@ function sendMail(string $subject, string $htmlBody, ?string $replyTo = null, ?s
         // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
 
         // Recipients
-        $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
+        $mail->setFrom($fromMail, $fromName);
         $mail->addAddress(MAIL_TO, MAIL_TO_NAME);
 
         if ($replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
@@ -106,12 +122,8 @@ function wrapEmailHtml(string $subject, string $body): string
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #F6F4F0; margin: 0; padding: 0; }
         .wrapper { max-width: 600px; margin: 32px auto; }
         .header { background: #111318; padding: 28px 32px; border-radius: 12px 12px 0 0; }
-        .logo-mark { display: inline-flex; align-items: center; justify-content: center;
-          width: 42px; height: 42px; background: #B5712A; border-radius: 8px;
-          color: #E8DCC8; font-family: Georgia, serif; font-size: 16px;
-          font-weight: bold; letter-spacing: -0.5px; }
+        .logo-mark { height: 34px; width: auto; vertical-align: middle; display: inline-block; }
         .logo-text { display: inline-block; vertical-align: middle; margin-left: 10px; }
-        .logo-name { font-family: Georgia, serif; font-size: 18px; color: #F6F4F0; display: block; }
         .logo-tag  { font-size: 11px; color: rgba(246,244,240,.4); letter-spacing: .1em; text-transform: uppercase; }
         .content { background: #ffffff; padding: 36px 32px; border-radius: 0 0 12px 12px; }
         h2 { font-family: Georgia, serif; color: #111318; font-size: 22px; margin: 0 0 20px; }
@@ -131,9 +143,8 @@ function wrapEmailHtml(string $subject, string $body): string
       <div class="wrapper">
         <div class="header">
           <div>
-            <span class="logo-mark">m2</span>
+            <img class="logo-mark" src="https://m2team.se/assets/images/M2-AB-logotyp-wht.png" alt="M2 Bygg Team AB">
             <span class="logo-text">
-              <span class="logo-name">M2 Bygg Team AB</span>
               <span class="logo-tag">Göteborg · Hisings Backa</span>
             </span>
           </div>

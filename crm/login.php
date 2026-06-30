@@ -39,12 +39,8 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 .login{width:100%;max-width:380px;text-align:center}
-.logo{
-  font-family:"SF Pro Display",-apple-system,"Inter",sans-serif;
-  font-size:64px;font-weight:800;letter-spacing:-4px;
-  color:#fff;line-height:1;margin-bottom:4px;
-}
-.logo span{color:#0066FF}
+.logo{margin-bottom:4px}
+.logo img{height:72px;width:auto}
 .brand{font-size:13px;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-bottom:8px}
 .tagline{font-size:14px;color:rgba(255,255,255,.45);margin-bottom:40px}
 .tagline em{font-style:normal;color:#3385FF}
@@ -80,7 +76,7 @@ body{
 </head>
 <body>
 <div class="login">
-  <div class="logo">m<span>2</span></div>
+  <div class="logo"><img src="/assets/images/M2-logotyp-wht.svg" alt="M2"></div>
   <div class="brand">Bygg Team</div>
   <p class="tagline">Trygga byggtjänster till <em>fast pris</em>.</p>
   <div class="card">

@@ -1,6 +1,6 @@
 <?php
 $page_title = 'Klä in fasad Göteborg – Fasadbeklädnad till fast pris';
-$page_description = 'Professionell infaskning och fasadbeklädnad i Göteborg. Träpanel, fibercementskivor och puts. Fast pris, ROT-avdrag och 5 år garanti. M2 Bygg Team AB.';
+$page_description = 'Professionell infaskning och fasadbeklädnad i Göteborg. Träpanel, fibercementskivor och puts. Fast pris och ROT-avdrag. M2 Bygg Team AB.';
 $active_page = 'tjanster';
 $breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Klä in fasad Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
@@ -20,12 +20,12 @@ require_once __DIR__ . '/../includes/header.php';
     <div style="max-width:600px">
       <p class="eyebrow animate-in" style="color:var(--gold-lt);margin-bottom:18px">Göteborg &amp; Västsverige</p>
       <h1 class="animate-in" style="margin-bottom:16px">Klä in fasad i Göteborg</h1>
-      <p class="animate-in">Fasadbeklädnad som skyddar och förnyar ditt hus – träpanel, fibercementskivor eller puts. Vi utför hela projektet från rivning till färdig fasad med fast pris och 5 år garanti.</p>
+      <p class="animate-in">Fasadbeklädnad som skyddar och förnyar ditt hus – träpanel, fibercementskivor eller puts. Vi utför hela projektet från rivning till färdig fasad med fast pris.</p>
       <ul style="list-style:none;margin:24px 0 28px;display:flex;flex-direction:column;gap:10px" class="animate-in">
         <?php foreach([
           'Träpanel, fibercementskivor och putsade fasader',
           'Komplett projekt – rivning, isolering och beklädnad',
-          'ROT-avdrag och 5 år garanti på allt arbete',
+          'ROT-avdrag på allt arbete',
           'Fast pris – inga överraskningar',
         ] as $p): ?>
         <li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px">

@@ -8,19 +8,22 @@ require_role(['super_admin','sales','finance','project']);
 $pdo = db();
 
 // ── REVENUE TREND (last 12 months, paid invoices by issue month) ───────────
-$revRows = $pdo->query("
-    SELECT strftime('%Y-%m', issue_date) AS ym, SUM(total) AS total, SUM(paid_amount) AS paid
-    FROM invoices
-    WHERE issue_date >= date('now','-12 months') AND status != 'cancelled'
-    GROUP BY ym ORDER BY ym
-")->fetchAll();
+// Grouped in PHP rather than SQL (strftime()/date('now',...) are SQLite-only and have
+// no direct MySQL equivalent) so this works identically on both drivers.
+$revCutoff = date('Y-m-d', strtotime('-12 months'));
+$revStmt = $pdo->prepare("SELECT issue_date, total, paid_amount FROM invoices WHERE issue_date >= ? AND status != 'cancelled'");
+$revStmt->execute([$revCutoff]);
 $revByMonth = [];
 for ($i = 11; $i >= 0; $i--) {
     $ym = date('Y-m', strtotime("-$i months"));
     $revByMonth[$ym] = ['total' => 0, 'paid' => 0];
 }
-foreach ($revRows as $r) {
-    if (isset($revByMonth[$r['ym']])) $revByMonth[$r['ym']] = ['total' => (float)$r['total'], 'paid' => (float)$r['paid']];
+foreach ($revStmt->fetchAll() as $r) {
+    $ym = substr((string)$r['issue_date'], 0, 7);
+    if (isset($revByMonth[$ym])) {
+        $revByMonth[$ym]['total'] += (float)$r['total'];
+        $revByMonth[$ym]['paid']  += (float)$r['paid_amount'];
+    }
 }
 $maxRev = max(1, max(array_column($revByMonth, 'total')));
 
@@ -71,14 +74,15 @@ $supplierStats = $pdo->query("
 $maxHours = max(1, max(array_column($supplierStats, 'hours') ?: [1]));
 
 // ── INVOICE AGING ─────────────────────────────────────────────────────────────
+// Days-overdue computed in PHP (julianday() is SQLite-only) so this works on both drivers.
 $agingBuckets = ['0-30' => 0, '31-60' => 0, '61-90' => 0, '90+' => 0];
 $agingRows = $pdo->query("
-    SELECT total - paid_amount AS remaining, julianday('now') - julianday(due_date) AS days_overdue
+    SELECT total, paid_amount, due_date
     FROM invoices WHERE status IN ('sent','partial','overdue') AND total > paid_amount
 ")->fetchAll();
 foreach ($agingRows as $r) {
-    $d = (float)$r['days_overdue'];
-    $amt = (float)$r['remaining'];
+    $amt = (float)$r['total'] - (float)$r['paid_amount'];
+    $d = $r['due_date'] ? (time() - strtotime($r['due_date'])) / 86400 : 0;
     if ($d <= 30)      $agingBuckets['0-30']  += $amt;
     elseif ($d <= 60)  $agingBuckets['31-60'] += $amt;
     elseif ($d <= 90)  $agingBuckets['61-90'] += $amt;
@@ -87,8 +91,15 @@ foreach ($agingRows as $r) {
 $totalOutstanding = array_sum($agingBuckets);
 
 // ── KPI SUMMARY ────────────────────────────────────────────────────────────────
-$revenueThisMonth = (float)$pdo->query("SELECT COALESCE(SUM(paid_amount),0) FROM invoices WHERE strftime('%Y-%m',issue_date)=strftime('%Y-%m','now')")->fetchColumn();
-$revenueLastMonth = (float)$pdo->query("SELECT COALESCE(SUM(paid_amount),0) FROM invoices WHERE strftime('%Y-%m',issue_date)=strftime('%Y-%m','now','-1 month')")->fetchColumn();
+// SUBSTR(issue_date,1,7) works identically on SQLite and MySQL (unlike strftime(), SQLite-only).
+$thisMonthYm = date('Y-m');
+$lastMonthYm = date('Y-m', strtotime('-1 month'));
+$revThisStmt = $pdo->prepare("SELECT COALESCE(SUM(paid_amount),0) FROM invoices WHERE SUBSTR(issue_date,1,7) = ?");
+$revThisStmt->execute([$thisMonthYm]);
+$revenueThisMonth = (float)$revThisStmt->fetchColumn();
+$revLastStmt = $pdo->prepare("SELECT COALESCE(SUM(paid_amount),0) FROM invoices WHERE SUBSTR(issue_date,1,7) = ?");
+$revLastStmt->execute([$lastMonthYm]);
+$revenueLastMonth = (float)$revLastStmt->fetchColumn();
 $revenueChange = $revenueLastMonth > 0 ? round(($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth * 100) : 0;
 $avgQuoteValue = (float)$pdo->query("SELECT COALESCE(AVG(total),0) FROM quotes WHERE status='accepted'")->fetchColumn();
 

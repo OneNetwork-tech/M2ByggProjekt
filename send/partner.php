@@ -46,6 +46,7 @@ if (!empty($errors)) {
 }
 
 /* ════════ CRM AUTOMATION: register supplier as pending ════════ */
+$supplierCreated = false;
 try {
     require_once __DIR__ . '/../crm/includes/db.php';
     $notes = trim($about);
@@ -53,13 +54,14 @@ try {
     db()->prepare("INSERT INTO suppliers (company, contact, email, phone, specialty, org_nr, status, notes) VALUES (?,?,?,?,?,?,'pending',?)")
         ->execute([trim($company), trim($contact), trim($email), trim($phone), trim($specialty), trim($orgnr), $notes]);
     $supId = db()->lastInsertId();
+    $supplierCreated = true;
     log_timeline('supplier', $supId, 'system', 'Partneransökan inkom via webben', '');
     notify_role('project', 'Ny partneransökan: ' . trim($company), trim($specialty), 'leverantorer.php');
 } catch (Throwable $ex) {
     error_log('CRM supplier creation failed: ' . $ex->getMessage());
 }
 
-$subject = "Partneransökan: " . safe($company) . " – " . safe($specialty);
+$subject = "Partneransökan: " . safe($company) . " - " . safe($specialty);
 $body = '';
 $fields = [
     'Företag'           => safe($company),
@@ -77,11 +79,20 @@ if (!empty($about)) {
     $body .= "<div class=\"field\"><div class=\"label\">Om företaget</div><div class=\"value\" style=\"white-space:pre-line\">" . safe($about) . "</div></div>";
 }
 
-$result = sendMail($subject, $body, $email, safe($contact));
+$emailResult = sendMail($subject, $body, $email, safe($contact));
+if (!$emailResult['success']) {
+    error_log('Partner form staff-notification email failed: ' . ($emailResult['message'] ?? 'unknown error'));
+}
 
-if ($result['success']) {
+if ($emailResult['success']) {
     $autoBody = "<div class=\"field\"><div class=\"value\">Hej " . safe($contact) . ",<br><br>Tack för din partneransökan till M2 Bygg Team AB! Vi granskar uppgifterna och återkommer inom <strong>2 arbetsdagar</strong>.<br><br>Med vänliga hälsningar,<br><strong>M2 Bygg Team AB</strong><br>031-96 88 88</div></div>";
     sendMail('Partneransökan mottagen – M2 Bygg Team AB', $autoBody, MAIL_TO, SMTP_FROM_NAME);
 }
 
-echo json_encode($result);
+// Same principle as contact.php: a real CRM-captured application shouldn't look like a
+// failed submission to the applicant just because the internal notification email failed.
+if ($supplierCreated || $emailResult['success']) {
+    echo json_encode(['success' => true, 'message' => 'Tack för din ansökan! Vi återkommer inom 2 arbetsdagar.']);
+} else {
+    echo json_encode($emailResult);
+}

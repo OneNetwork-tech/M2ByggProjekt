@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                  VALUES (?,?,?,?,?,?,?)"
             )->execute([$qid, $signerName, $pu['email'] ?? null, $signature, $consentText, $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '']);
 
-            db()->prepare("UPDATE quotes SET status='accepted', accepted_at=datetime('now','localtime') WHERE id=?")->execute([$qid]);
+            db()->prepare("UPDATE quotes SET status='accepted', accepted_at=" . now_expr() . " WHERE id=?")->execute([$qid]);
             log_timeline('quote', $qid, 'status', 'Offert signerad och accepterad av kund (' . $signerName . ')', '', null);
             notify_role('sales', 'Offert signerad och accepterad!',
                 'Kund ' . $pu['name'] . ' signerade och accepterade offert #' . $qid,
@@ -67,7 +67,7 @@ if ($qid) {
     if (!$quote) { header('Location: /portal/offerter.php'); exit; }
     // Mark as viewed
     if ($quote['status'] === 'sent') {
-        db()->prepare("UPDATE quotes SET status='viewed', viewed_at=datetime('now','localtime') WHERE id=?")->execute([$qid]);
+        db()->prepare("UPDATE quotes SET status='viewed', viewed_at=" . now_expr() . " WHERE id=?")->execute([$qid]);
         $quote['status'] = 'viewed';
     }
     $s2 = db()->prepare("SELECT * FROM quote_items WHERE quote_id = ? ORDER BY sort_order");

@@ -36,13 +36,14 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     $PK   = $isMysql ? 'INT AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
     $NOW  = $isMysql ? 'CURRENT_TIMESTAMP' : "datetime('now','localtime')";
     $TXT  = 'TEXT';
+    $VKEY = $isMysql ? 'VARCHAR(191)' : 'TEXT'; // for columns used as a PRIMARY/UNIQUE KEY — MySQL rejects TEXT in a key without an explicit length
 
     $tables = [
 
     "CREATE TABLE IF NOT EXISTS users (
         id $PK,
         name $TXT NOT NULL,
-        email $TXT NOT NULL UNIQUE,
+        email $VKEY NOT NULL UNIQUE,
         password_hash $TXT NOT NULL,
         role $TXT NOT NULL DEFAULT 'sales',
         phone $TXT,
@@ -67,7 +68,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
 
     "CREATE TABLE IF NOT EXISTS leads (
         id $PK,
-        lead_no $TXT UNIQUE,
+        lead_no $VKEY UNIQUE,
         name $TXT NOT NULL,
         email $TXT,
         phone $TXT,
@@ -88,7 +89,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
 
     "CREATE TABLE IF NOT EXISTS quotes (
         id $PK,
-        quote_no $TXT UNIQUE,
+        quote_no $VKEY UNIQUE,
         lead_id INTEGER,
         customer_id INTEGER,
         title $TXT NOT NULL,
@@ -122,7 +123,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
 
     "CREATE TABLE IF NOT EXISTS projects (
         id $PK,
-        project_no $TXT UNIQUE,
+        project_no $VKEY UNIQUE,
         customer_id INTEGER,
         quote_id INTEGER,
         title $TXT NOT NULL,
@@ -155,7 +156,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
 
     "CREATE TABLE IF NOT EXISTS invoices (
         id $PK,
-        invoice_no $TXT UNIQUE,
+        invoice_no $VKEY UNIQUE,
         customer_id INTEGER,
         project_id INTEGER,
         quote_id INTEGER,
@@ -200,7 +201,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
 
     "CREATE TABLE IF NOT EXISTS blog_posts (
         id $PK,
-        slug $TXT UNIQUE NOT NULL,
+        slug $VKEY UNIQUE NOT NULL,
         title $TXT NOT NULL,
         excerpt $TXT,
         body $TXT,
@@ -260,7 +261,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
         category $TXT NOT NULL DEFAULT 'Övrigt',
         icon_key $TXT DEFAULT 'tools',
         title $TXT NOT NULL,
-        slug $TXT UNIQUE NOT NULL,
+        slug $VKEY UNIQUE NOT NULL,
         description $TXT,
         price_label $TXT,
         detail_body $TXT,
@@ -348,7 +349,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     )",
 
     "CREATE TABLE IF NOT EXISTS settings (
-        skey $TXT PRIMARY KEY,
+        skey $VKEY PRIMARY KEY,
         svalue $TXT
     )",
 
@@ -357,7 +358,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     "CREATE TABLE IF NOT EXISTS portal_users (
         id $PK,
         customer_id INTEGER NOT NULL UNIQUE,
-        email $TXT NOT NULL UNIQUE,
+        email $VKEY NOT NULL UNIQUE,
         password_hash $TXT NOT NULL,
         active INTEGER DEFAULT 1,
         last_login $TXT,
@@ -367,7 +368,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     "CREATE TABLE IF NOT EXISTS portal_invites (
         id $PK,
         customer_id INTEGER NOT NULL,
-        token $TXT NOT NULL UNIQUE,
+        token $VKEY NOT NULL UNIQUE,
         email $TXT NOT NULL,
         used_at $TXT,
         expires_at $TXT NOT NULL,
@@ -377,7 +378,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     "CREATE TABLE IF NOT EXISTS supplier_users (
         id $PK,
         supplier_id INTEGER NOT NULL UNIQUE,
-        email $TXT NOT NULL UNIQUE,
+        email $VKEY NOT NULL UNIQUE,
         password_hash $TXT NOT NULL,
         active INTEGER DEFAULT 1,
         last_login $TXT,
@@ -387,7 +388,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     "CREATE TABLE IF NOT EXISTS supplier_invites (
         id $PK,
         supplier_id INTEGER NOT NULL,
-        token $TXT NOT NULL UNIQUE,
+        token $VKEY NOT NULL UNIQUE,
         email $TXT NOT NULL,
         used_at $TXT,
         expires_at $TXT NOT NULL,
@@ -398,7 +399,7 @@ function migrate(PDO $pdo, ?string $driver = null): void {
         id $PK,
         user_type $TXT NOT NULL,
         user_id INTEGER NOT NULL,
-        token $TXT NOT NULL UNIQUE,
+        token $VKEY NOT NULL UNIQUE,
         used_at $TXT,
         expires_at $TXT NOT NULL,
         created_at $TXT DEFAULT ($NOW)
@@ -553,6 +554,52 @@ function migrate(PDO $pdo, ?string $driver = null): void {
         description $TXT,
         created_at $TXT DEFAULT ($NOW)
     )",
+
+    "CREATE TABLE IF NOT EXISTS email_accounts (
+        id $PK,
+        label $TXT NOT NULL,
+        host $TXT NOT NULL,
+        port INTEGER NOT NULL DEFAULT 465,
+        encryption $TXT NOT NULL DEFAULT 'ssl',
+        username $TXT NOT NULL,
+        password $TXT NOT NULL,
+        from_email $TXT NOT NULL,
+        from_name $TXT NOT NULL DEFAULT 'M2 Bygg Team AB',
+        imap_host $TXT,
+        imap_port INTEGER NOT NULL DEFAULT 993,
+        imap_encryption $TXT NOT NULL DEFAULT 'ssl',
+        is_default INTEGER NOT NULL DEFAULT 0,
+        active INTEGER NOT NULL DEFAULT 1,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    // Leverantörsfakturor — invoices suppliers submit to M2 for completed work (payables).
+    // Deliberately separate from the customer-facing invoices table above (receivables);
+    // the two have different statuses, different portals, and different email flows.
+    "CREATE TABLE IF NOT EXISTS supplier_invoices (
+        id $PK,
+        invoice_no $VKEY UNIQUE,
+        supplier_id INTEGER NOT NULL,
+        project_id INTEGER,
+        status $TXT DEFAULT 'pending',
+        amount REAL DEFAULT 0,
+        vat REAL DEFAULT 0,
+        total REAL DEFAULT 0,
+        paid_amount REAL DEFAULT 0,
+        due_date $TXT,
+        description $TXT,
+        created_at $TXT DEFAULT ($NOW)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS supplier_payments (
+        id $PK,
+        supplier_invoice_id INTEGER NOT NULL,
+        amount REAL NOT NULL,
+        method $TXT,
+        paid_at $TXT,
+        note $TXT,
+        created_at $TXT DEFAULT ($NOW)
+    )",
     ];
 
     foreach ($tables as $sql) $pdo->exec($sql);
@@ -561,6 +608,9 @@ function migrate(PDO $pdo, ?string $driver = null): void {
     add_column_if_missing($pdo, 'portfolio_projects', 'linked_project_id', 'INTEGER');
     add_column_if_missing($pdo, 'reviews', 'reply_body', 'TEXT');
     add_column_if_missing($pdo, 'reviews', 'reply_at', 'TEXT');
+    add_column_if_missing($pdo, 'email_accounts', 'imap_host', 'TEXT');
+    add_column_if_missing($pdo, 'email_accounts', 'imap_port', 'INTEGER NOT NULL DEFAULT 993');
+    add_column_if_missing($pdo, 'email_accounts', 'imap_encryption', "TEXT NOT NULL DEFAULT 'ssl'");
 
     // Seed admin user if none exists
     $count = $pdo->query("SELECT COUNT(*) AS c FROM users")->fetch()['c'];
@@ -588,6 +638,24 @@ function add_column_if_missing(PDO $pdo, string $table, string $column, string $
 }
 
 /* ── HELPERS ──────────────────────────────────────────────── */
+
+/** Driver-aware "current timestamp" SQL fragment for use inside raw query strings. */
+function now_expr(): string {
+    return DB_DRIVER === 'mysql' ? 'NOW()' : "datetime('now','localtime')";
+}
+
+/** Driver-aware "today's date" SQL fragment (no time component) for use inside raw query strings. */
+function today_expr(): string {
+    return DB_DRIVER === 'mysql' ? 'CURDATE()' : "date('now')";
+}
+
+/**
+ * Driver-aware "today + N days" SQL fragment. $days may be negative for "N days ago".
+ * Returns a literal computed in PHP, so it's safe to splice directly into a query string.
+ */
+function date_offset_expr(int $days): string {
+    return "'" . date('Y-m-d', strtotime(($days >= 0 ? "+{$days}" : (string)$days) . ' days')) . "'";
+}
 
 /** Generate next sequential document number, e.g. L-2025-0001 */
 function next_number(string $prefix, string $table, string $col): string {
@@ -632,12 +700,13 @@ function notify_role(string $role, string $title, string $body = '', string $lin
  */
 function rate_limit_check(string $scope, string $identifier, int $maxAttempts = 5, int $windowMinutes = 15): bool {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $cutoff = date('Y-m-d H:i:s', strtotime("-{$windowMinutes} minutes"));
     $s = db()->prepare(
         "SELECT COUNT(*) FROM login_attempts
          WHERE scope = ? AND (identifier = ? OR ip_address = ?) AND success = 0
-           AND created_at > datetime('now', ?)"
+           AND created_at > ?"
     );
-    $s->execute([$scope, strtolower(trim($identifier)), $ip, "-{$windowMinutes} minutes"]);
+    $s->execute([$scope, strtolower(trim($identifier)), $ip, $cutoff]);
     return (int)$s->fetchColumn() < $maxAttempts;
 }
 
@@ -647,7 +716,8 @@ function rate_limit_record(string $scope, string $identifier, bool $success): vo
         ->execute([$scope, strtolower(trim($identifier)), $ip, $success ? 1 : 0]);
     // Opportunistic cleanup of old rows so the table doesn't grow forever
     if (random_int(1, 50) === 1) {
-        db()->prepare("DELETE FROM login_attempts WHERE created_at < datetime('now','-7 days')")->execute();
+        $cutoff = date('Y-m-d H:i:s', strtotime('-7 days'));
+        db()->prepare("DELETE FROM login_attempts WHERE created_at < ?")->execute([$cutoff]);
     }
 }
 
@@ -659,7 +729,7 @@ function create_password_reset_token(string $userType, int $userId, int $expires
     $token   = bin2hex(random_bytes(32));
     $expires = date('Y-m-d H:i:s', strtotime("+{$expiresMinutes} minutes"));
     // Invalidate any earlier unused reset requests for this user so only the latest link works.
-    db()->prepare("UPDATE password_resets SET used_at = datetime('now','localtime') WHERE user_type = ? AND user_id = ? AND used_at IS NULL")
+    db()->prepare("UPDATE password_resets SET used_at = " . now_expr() . " WHERE user_type = ? AND user_id = ? AND used_at IS NULL")
         ->execute([$userType, $userId]);
     db()->prepare("INSERT INTO password_resets (user_type, user_id, token, expires_at) VALUES (?,?,?,?)")
         ->execute([$userType, $userId, $token, $expires]);
@@ -669,14 +739,14 @@ function create_password_reset_token(string $userType, int $userId, int $expires
 function find_password_reset(string $userType, string $token): ?array {
     if ($token === '') return null;
     $s = db()->prepare(
-        "SELECT * FROM password_resets WHERE user_type = ? AND token = ? AND used_at IS NULL AND expires_at > datetime('now','localtime')"
+        "SELECT * FROM password_resets WHERE user_type = ? AND token = ? AND used_at IS NULL AND expires_at > " . now_expr() . ""
     );
     $s->execute([$userType, $token]);
     return $s->fetch() ?: null;
 }
 
 function consume_password_reset(int $resetId): void {
-    db()->prepare("UPDATE password_resets SET used_at = datetime('now','localtime') WHERE id = ?")->execute([$resetId]);
+    db()->prepare("UPDATE password_resets SET used_at = " . now_expr() . " WHERE id = ?")->execute([$resetId]);
 }
 
 /** Key/value settings store — used for OAuth tokens and other runtime config. */
@@ -696,6 +766,23 @@ function set_setting(string $key, string $value): void {
         db()->prepare("INSERT INTO settings (skey, svalue) VALUES (?,?) ON CONFLICT(skey) DO UPDATE SET svalue = ?")
             ->execute([$key, $value, $value]);
     }
+}
+
+/**
+ * Outgoing email accounts (SMTP), configurable from crm/installningar.php instead of
+ * hardcoded constants. Supports multiple accounts (e.g. a separate Outlook/Microsoft 365
+ * account alongside the main mail.m2team.se one); crm_send_mail()/sendMail() use the
+ * default active account, or a specific one if $accountId is passed.
+ */
+function get_default_email_account(): ?array {
+    $s = db()->query("SELECT * FROM email_accounts WHERE active = 1 ORDER BY is_default DESC, id ASC LIMIT 1");
+    return $s->fetch() ?: null;
+}
+
+function get_email_account(int $id): ?array {
+    $s = db()->prepare("SELECT * FROM email_accounts WHERE id = ? AND active = 1");
+    $s->execute([$id]);
+    return $s->fetch() ?: null;
 }
 
 /**

@@ -60,6 +60,7 @@ require_once __DIR__ . '/includes/header.php';
           <div style="font-family:var(--font-display);font-weight:600;color:#fff;margin-bottom:6px">Ansökan mottagen!</div>
           <div style="font-size:13.5px;color:rgba(255,255,255,.6)">Vi granskar och återkommer inom 2 arbetsdagar.</div>
         </div>
+        <div id="partner-error" role="alert" style="display:none;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.3);border-radius:var(--r-md);padding:14px 16px;font-size:13.5px;color:#FCA5A5;margin-bottom:10px"></div>
 
         <form id="partner-form" action="/send/partner.php" method="POST" novalidate>
           <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">

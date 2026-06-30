@@ -10,7 +10,7 @@
   <img src="/assets/images/logo.png" alt="M2 Bygg Team" style="display: block; max-height: 40px; width: auto; height: auto;">
 </a>
         </div>
-        <p class="footer__desc">Professionella tak- och fasadarbeten i Göteborg och Västsverige. Fast pris, ROT-avdrag och 5 år garanti på allt vi utför.</p>
+        <p class="footer__desc">Professionella tak- och fasadarbeten i Göteborg och Västsverige. Fast pris och ROT-avdrag på allt vi utför.</p>
         <div class="footer__social">
           <a href="<?= htmlspecialchars($instagram ?? '#') ?>" target="_blank" rel="noopener" aria-label="Instagram">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>

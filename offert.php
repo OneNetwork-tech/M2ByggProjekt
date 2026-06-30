@@ -5,10 +5,10 @@ $active_page      = 'offert';
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<section style="min-height:calc(100vh - 68px);display:grid;grid-template-columns:1fr 520px">
+<section class="offert-split">
 
   <!-- LEFT – Trust panel -->
-  <div style="background:var(--coal);padding:64px 52px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden">
+  <div class="offert-split__trust" style="background:var(--coal);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden">
     <div style="position:absolute;top:-100px;left:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(181,113,42,.1) 0%,transparent 65%);pointer-events:none"></div>
     <div style="position:relative;z-index:1;max-width:480px">
       <p class="eyebrow animate-in" style="color:var(--copper-lt);margin-bottom:20px">Svar inom 24 timmar</p>
@@ -20,7 +20,7 @@ require_once __DIR__ . '/includes/header.php';
         $trust = [
           ['<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 5h-2v6h2V7zm0 8h-2v2h2v-2z" fill="currentColor"/>','Fast pris – alltid','Prisgaranti ingår i varje offert'],
           ['<path d="M9 14l6-6M9.5 8.5a.5.5 0 110-1 .5.5 0 010 1zm5 5a.5.5 0 110-1 .5.5 0 010 1z"/><rect x="3" y="3" width="18" height="18" rx="3"/>','ROT-avdrag upp till 50%','Vi hanterar ansökan till Skatteverket'],
-          ['<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>','5 år garanti','På allt arbete vi utför'],
+          ['<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>','Kostnadsfri offert','Svar inom 24h'],
           ['<path d="M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3"/>','4,9/5 på Google','Baserat på 1 000+ recensioner'],
         ];
         foreach ($trust as $t): ?>
@@ -53,8 +53,8 @@ require_once __DIR__ . '/includes/header.php';
   </div>
 
   <!-- RIGHT – Form -->
-  <div style="background:var(--sand-lt);padding:60px 48px;overflow-y:auto">
-    <div style="max-width:420px">
+  <div class="offert-split__form" style="background:var(--sand-lt);overflow-y:auto">
+    <div style="max-width:420px;width:100%">
       <h2 style="margin-bottom:6px">Berätta om ditt projekt</h2>
       <p style="color:var(--steel);margin-bottom:28px;font-size:15px">Vi återkommer med ett fast pris inom 24 timmar.</p>
 

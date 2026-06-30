@@ -84,3 +84,13 @@ function refresh_invoice_status(int $invoiceId): void {
     elseif ($i['due_date'] && strtotime($i['due_date']) < time() && $i['status'] === 'sent') $status = 'overdue';
     db()->prepare("UPDATE invoices SET status = ? WHERE id = ?")->execute([$status, $invoiceId]);
 }
+
+/** Update a supplier (leverantör) invoice's status once it's fully paid */
+function refresh_supplier_invoice_status(int $invoiceId): void {
+    $inv = db()->prepare("SELECT * FROM supplier_invoices WHERE id = ?"); $inv->execute([$invoiceId]);
+    $i = $inv->fetch(); if (!$i) return;
+    if ($i['status'] === 'rejected') return;
+    if ($i['paid_amount'] >= $i['total'] && $i['total'] > 0) {
+        db()->prepare("UPDATE supplier_invoices SET status = 'paid' WHERE id = ?")->execute([$invoiceId]);
+    }
+}

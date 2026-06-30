@@ -6,7 +6,7 @@ $me = require_login();
 $pdo = db();
 
 // mark notifications read
-$pdo->prepare("UPDATE notifications SET read_at = datetime('now','localtime') WHERE user_id=? AND read_at IS NULL")->execute([$me['id']]);
+$pdo->prepare("UPDATE notifications SET read_at = " . now_expr() . " WHERE user_id=? AND read_at IS NULL")->execute([$me['id']]);
 
 $view = $_GET['view'] ?? 'activity';
 
@@ -21,7 +21,7 @@ if ($view === 'portal') {
             $pdo->prepare("INSERT INTO portal_messages (project_id, sender_type, sender_id, body) VALUES (?,?,?,?)")
                 ->execute([$pid, 'staff', $me['id'], $body]);
             // Mark customer messages in this thread as read
-            $pdo->prepare("UPDATE portal_messages SET read_at=datetime('now','localtime') WHERE project_id=? AND sender_type='customer' AND read_at IS NULL")
+            $pdo->prepare("UPDATE portal_messages SET read_at=" . now_expr() . " WHERE project_id=? AND sender_type='customer' AND read_at IS NULL")
                 ->execute([$pid]);
 
             // Email the customer
@@ -63,7 +63,7 @@ if ($view === 'portal') {
     $threadProj = null;
     if ($activeThread) {
         // Mark unread customer messages as read when staff opens thread
-        $pdo->prepare("UPDATE portal_messages SET read_at=datetime('now','localtime') WHERE project_id=? AND sender_type='customer' AND read_at IS NULL")
+        $pdo->prepare("UPDATE portal_messages SET read_at=" . now_expr() . " WHERE project_id=? AND sender_type='customer' AND read_at IS NULL")
             ->execute([$activeThread]);
 
         $s = $pdo->prepare("

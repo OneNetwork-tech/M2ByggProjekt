@@ -46,7 +46,7 @@ return [
     'dash.unpaid_amount'      => 'Obetalt belopp',
 
     // Homepage hero
-    'home.hero_sub'        => 'M2 samordnar ett nätverk av kvalitetssäkrade partners.<br>Du har <strong style="color:var(--gold-lt)">en kontaktpunkt</strong> – vi hanterar resten.',
+    'home.hero_sub'        => 'Vi är proffs på allt inom tak och fasad.<br>Kontakta oss idag för <strong style="color:var(--gold-lt)">kostnadsfri konsultation</strong>.',
     'home.cta_start'       => 'Kom igång – kostnadsfritt',
     'home.cta_how'         => 'Hur det fungerar',
     'home.trust_contact'      => 'En kontaktpunkt',

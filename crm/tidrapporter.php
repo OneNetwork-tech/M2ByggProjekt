@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare("UPDATE time_reports SET approved=1 WHERE id IN (" . implode(',', $ids) . ")")->execute();
             flash(count($ids) . ' rapport(er) godkänd(a).');
         } elseif ($action === 'pay') {
-            $pdo->prepare("UPDATE time_reports SET paid_at=datetime('now','localtime') WHERE id IN (" . implode(',', $ids) . ") AND approved=1")->execute();
+            $pdo->prepare("UPDATE time_reports SET paid_at=" . now_expr() . " WHERE id IN (" . implode(',', $ids) . ") AND approved=1")->execute();
             flash(count($ids) . ' rapport(er) markerad(e) som betald(a).');
         } elseif ($action === 'unapprove') {
             $pdo->prepare("UPDATE time_reports SET approved=0 WHERE id IN (" . implode(',', $ids) . ")")->execute();

@@ -27,10 +27,14 @@ function require_login(): array {
     return $user;
 }
 
-/** Role check. super_admin passes everything. */
+/**
+ * Role check. super_admin and admin both pass everything (admin-tier roles have full
+ * app access) — the narrower restriction (admin can't create/promote/demote/deactivate
+ * other admin-tier accounts) is enforced separately in crm/anvandare.php, not here.
+ */
 function require_role(array $roles): array {
     $user = require_login();
-    if ($user['role'] !== 'super_admin' && !in_array($user['role'], $roles)) {
+    if (!in_array($user['role'], ADMIN_TIER_ROLES) && !in_array($user['role'], $roles)) {
         http_response_code(403);
         die('<div style="font-family:sans-serif;padding:48px;text-align:center"><h2>403 – Behörighet saknas</h2><p>Din roll har inte tillgång till denna sida.</p><a href="index.php">← Tillbaka</a></div>');
     }

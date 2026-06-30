@@ -26,7 +26,7 @@ $faqs = [
     ['Ingår färgkonsultation?', 'Ja, kostnadsfritt. Vi ger alltid råd om färgval baserat på hustyp, stil, omgivning och kommunens riktlinjer. Vi kan även visa hur din fasad ser ut med olika färger innan du bestämmer dig.'],
   ],
   'Garanti & Trygghet' => [
-    ['Ger ni garanti på arbetet?', 'Ja, 5 år garanti ingår på allt utfört arbete. Om något problem uppstår till följd av vårt arbete åtgärdar vi det utan kostnad. Vi är fullständigt försäkrade.'],
+    ['Ger ni garanti på arbetet?', 'Om något problem uppstår till följd av vårt arbete åtgärdar vi det utan kostnad. Vi är fullständigt försäkrade.'],
     ['Är ni försäkrade?', 'Ja, vi har fullständig ansvarsförsäkring som täcker eventuella skador på din fastighet under utförandet. Alla hantverkare är yrkescertifierade. Du är alltid skyddad.'],
   ],
   'Process & Område' => [

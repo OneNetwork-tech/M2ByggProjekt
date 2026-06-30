@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="portal-login">
   <div class="portal-login__card">
     <div class="portal-login__logo">
-      <div class="portal-login__logo-mark">m2</div>
+      <img class="portal-login__logo-mark" src="/assets/images/M2-symbol-blk.svg" alt="M2">
       <div class="portal-login__logo-text">
         <strong>M2 Bygg Team</strong>
         <span><?= e(t('portal.badge')) ?></span>

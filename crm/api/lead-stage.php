@@ -12,7 +12,7 @@ $stage = $input['stage'] ?? '';
 
 if (!$id || !isset(LEAD_STAGES[$stage])) { echo json_encode(['success'=>false,'message'=>'Ogiltig data']); exit; }
 
-db()->prepare("UPDATE leads SET stage=?, updated_at=datetime('now','localtime') WHERE id=?")->execute([$stage, $id]);
+db()->prepare("UPDATE leads SET stage=?, updated_at=" . now_expr() . " WHERE id=?")->execute([$stage, $id]);
 log_timeline('lead', $id, 'status', 'Status ändrad till ' . LEAD_STAGES[$stage]['label'] . ' (drag & drop)', '', $me['id']);
 audit('lead_stage', 'lead', $id, $stage);
 echo json_encode(['success'=>true]);

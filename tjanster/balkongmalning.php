@@ -1,6 +1,6 @@
 <?php
 $page_title = 'Balkongmålning Göteborg – Räcke och balkong till fast pris';
-$page_description = 'Professionell balkongmålning och räckesmålning i Göteborg. Rostskydd, träolja och lackering. Fast pris, ROT-avdrag och 5 år garanti. M2 Bygg Team AB.';
+$page_description = 'Professionell balkongmålning och räckesmålning i Göteborg. Rostskydd, träolja och lackering. Fast pris och ROT-avdrag. M2 Bygg Team AB.';
 $active_page = 'tjanster';
 $breadcrumbs = [['Hem', '/'], ['Tjänster', '/tjanster'], ['Balkongmålning Göteborg', null]];
 require_once __DIR__ . '/../includes/header.php';
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../includes/header.php';
           'Balkong, räcke, trappa och uteplats',
           'Rostskyddsbehandling för metall – järn och aluminium',
           'Träolja och lackning för trä',
-          'ROT-avdrag och 5 år garanti',
+          'ROT-avdrag och fast pris',
         ] as $p): ?>
         <li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--gold-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>

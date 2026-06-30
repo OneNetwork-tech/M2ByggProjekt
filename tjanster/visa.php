@@ -18,7 +18,7 @@ if (!$service) {
 }
 
 $page_title       = $service['title'] . ' – M2 Bygg Team AB';
-$page_description = $service['description'] ?: $service['title'] . ' från M2 Bygg Team AB. Fast pris, ROT-avdrag och 5 år garanti i Göteborg och Västsverige.';
+$page_description = $service['description'] ?: $service['title'] . ' från M2 Bygg Team AB. Fast pris och ROT-avdrag i Göteborg och Västsverige.';
 $active_page      = 'tjanster';
 require_once dirname(__DIR__) . '/includes/header.php';
 ?>

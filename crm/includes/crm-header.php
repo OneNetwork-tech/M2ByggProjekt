@@ -42,6 +42,8 @@ $navGroups = [
      'icon'=>'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'],
     ['key'=>'fakturor','href'=>'fakturor.php','label'=>'Fakturor','roles'=>['finance','sales'],
      'icon'=>'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>'],
+    ['key'=>'leverantorsfakturor','href'=>'leverantorsfakturor.php','label'=>'Leverantörsfakturor','roles'=>['finance','sales'],
+     'icon'=>'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/>'],
     ['key'=>'paminnelser','href'=>'paminnelser.php','label'=>'Påminnelser','roles'=>['finance','sales'],
      'icon'=>'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>'],
     ['key'=>'bokforing','href'=>'bokforing.php','label'=>'Bokföring','roles'=>['super_admin'],
@@ -85,7 +87,7 @@ $adminItems = [
 
 function nav_visible(?array $roles, array $me): bool {
   if ($roles === null) return true;
-  if ($me['role'] === 'super_admin') return true;
+  if (in_array($me['role'], ADMIN_TIER_ROLES)) return true;
   return in_array($me['role'], $roles);
 }
 
@@ -112,7 +114,7 @@ function nav_group_slug(string $label): string {
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <a href="index.php" class="sidebar__logo">
-      <div class="sidebar__logo-mark">m2</div>
+      <img class="sidebar__logo-mark" src="/assets/images/M2-symbol-wht.svg" alt="M2">
       <div class="sidebar__logo-text">
         <div class="sidebar__logo-name">M2 Platform</div>
         <div class="sidebar__logo-sub">Bygg Team CRM</div>
@@ -125,11 +127,11 @@ function nav_group_slug(string $label): string {
         <span class="nav-label"><?= e($dashboardItem['label']) ?></span>
       </a>
 
-      <?php foreach ($navGroups as $groupLabel => $items):
-        $visibleItems = array_values(array_filter($items, fn($i) => nav_visible($i['roles'], $me)));
-        if (!$visibleItems) continue;
+      <?php foreach ($navGroups as $groupLabel => $navGroupItems):
+        $navVisibleItems = array_values(array_filter($navGroupItems, fn($i) => nav_visible($i['roles'], $me)));
+        if (!$navVisibleItems) continue;
         $groupSlug = nav_group_slug($groupLabel);
-        $isActiveGroup = in_array($crm_page, array_column($visibleItems, 'key'));
+        $isActiveGroup = in_array($crm_page, array_column($navVisibleItems, 'key'));
       ?>
       <div class="nav-group <?= $isActiveGroup ? 'open' : '' ?>" data-group="<?= $groupSlug ?>">
         <button type="button" class="nav-group__header" onclick="toggleNavGroup('<?= $groupSlug ?>')">
@@ -138,11 +140,11 @@ function nav_group_slug(string $label): string {
         </button>
         <div class="nav-group__body">
           <div class="nav-group__body-inner">
-            <?php foreach ($visibleItems as $item): ?>
-            <a href="<?= $item['href'] ?>" class="nav-link <?= $crm_page === $item['key'] ? 'active' : '' ?>" title="<?= e($item['label']) ?>">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= $item['icon'] ?></svg>
-              <span class="nav-label"><?= e($item['label']) ?></span>
-              <?php if (!empty($item['count'])): ?><span class="nav-count"><?= $item['count'] ?></span><?php endif; ?>
+            <?php foreach ($navVisibleItems as $navItem): ?>
+            <a href="<?= $navItem['href'] ?>" class="nav-link <?= $crm_page === $navItem['key'] ? 'active' : '' ?>" title="<?= e($navItem['label']) ?>">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= $navItem['icon'] ?></svg>
+              <span class="nav-label"><?= e($navItem['label']) ?></span>
+              <?php if (!empty($navItem['count'])): ?><span class="nav-count"><?= $navItem['count'] ?></span><?php endif; ?>
             </a>
             <?php endforeach; ?>
           </div>
@@ -161,11 +163,11 @@ function nav_group_slug(string $label): string {
         </button>
         <div class="nav-group__body">
           <div class="nav-group__body-inner">
-            <?php foreach ($adminItems as $item): ?>
-            <a href="<?= $item['href'] ?>" class="nav-link <?= $crm_page === $item['key'] ? 'active' : '' ?>" title="<?= e($item['label']) ?>">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= $item['icon'] ?></svg>
-              <span class="nav-label"><?= e($item['label']) ?></span>
-              <?php if (!empty($item['count'])): ?><span class="nav-count"><?= $item['count'] ?></span><?php endif; ?>
+            <?php foreach ($adminItems as $navItem): ?>
+            <a href="<?= $navItem['href'] ?>" class="nav-link <?= $crm_page === $navItem['key'] ? 'active' : '' ?>" title="<?= e($navItem['label']) ?>">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?= $navItem['icon'] ?></svg>
+              <span class="nav-label"><?= e($navItem['label']) ?></span>
+              <?php if (!empty($navItem['count'])): ?><span class="nav-count"><?= $navItem['count'] ?></span><?php endif; ?>
             </a>
             <?php endforeach; ?>
           </div>

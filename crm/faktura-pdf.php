@@ -40,7 +40,7 @@ body{font-family:"SF Pro Text",-apple-system,"Inter","Segoe UI",sans-serif;color
 .sheet{max-width:800px;margin:0 auto;background:#fff;border-radius:16px;padding:48px 52px;box-shadow:0 4px 24px rgba(16,24,40,.08)}
 .head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px}
 .logo{display:flex;align-items:center;gap:11px}
-.logo-mark{width:46px;height:46px;background:#0B1220;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px;letter-spacing:-1px}
+.logo-mark{height:46px;width:auto;display:block}
 .logo-name{font-weight:700;font-size:17px}
 .logo-sub{font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:.08em}
 .doc-type{text-align:right}
@@ -75,8 +75,8 @@ td{padding:11px 12px;font-size:13.5px;border-bottom:1px solid #F3F4F6}
 <div class="sheet">
   <div class="head">
     <div class="logo">
-      <div class="logo-mark">m2</div>
-      <div><div class="logo-name">M2 Bygg Team AB</div><div class="logo-sub">Trygga byggtjänster · Fast pris</div></div>
+      <img class="logo-mark" src="/assets/images/M2-AB-logotyp-blk.svg" alt="M2 Bygg Team AB">
+      <div class="logo-sub">Trygga byggtjänster · Fast pris</div>
     </div>
     <div class="doc-type">
       <h1>FAKTURA</h1>

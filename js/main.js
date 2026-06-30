@@ -353,8 +353,10 @@ document.addEventListener('keydown', e => e.key === 'Escape' && closeLightbox())
     const btn = form.querySelector('[type=submit]');
     const txt = btn?.querySelector('.btn-text');
     const spn = btn?.querySelector('.spinner');
-    const err = form.querySelector('#form-error-box');
-    const suc = form.querySelector('#form-success');
+    // These boxes sit as siblings before <form>, not inside it (so the success box can
+    // visually replace the form) — must search the whole document, not just the form.
+    const err = document.querySelector('#form-error-box');
+    const suc = document.querySelector('#form-success');
     if (err) err.style.display = 'none';
     if (spn) spn.style.display = 'inline-block';
     if (txt) txt.style.display = 'none';
@@ -366,6 +368,28 @@ document.addEventListener('keydown', e => e.key === 'Escape' && closeLightbox())
       else { if(err) { err.textContent = data.message||'Fel. Försök igen.'; err.style.display='block'; } }
     } catch { if(err) { err.textContent='Nätverksfel. Ring oss direkt.'; err.style.display='block'; } }
     finally { if(spn) spn.style.display='none'; if(txt) txt.style.display='inline'; if(btn) btn.disabled=false; }
+  });
+})();
+
+/* ── PARTNER FORM AJAX ─────────────────────────────────── */
+(function() {
+  const form = $('#partner-form');
+  if (!form) return;
+  const btn = form.querySelector('[type=submit]');
+  const err = document.querySelector('#partner-error');
+  const suc = document.querySelector('#partner-success');
+
+  on(form, 'submit', async e => {
+    e.preventDefault();
+    if (err) err.style.display = 'none';
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+      const data = await res.json();
+      if (data.success) { form.style.display = 'none'; if (suc) suc.style.display = 'block'; }
+      else { if (err) { err.textContent = data.message || 'Fel. Försök igen.'; err.style.display = 'block'; } }
+    } catch { if (err) { err.textContent = 'Nätverksfel. Ring oss direkt.'; err.style.display = 'block'; } }
+    finally { if (btn) btn.disabled = false; }
   });
 })();
 

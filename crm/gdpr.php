@@ -20,11 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($action === 'resolve_anonymize') {
                 if ($req['entity_type'] === 'customer') gdpr_anonymize_customer($req['entity_id']);
                 else gdpr_anonymize_supplier($req['entity_id']);
-                $pdo->prepare("UPDATE gdpr_requests SET status='completed', resolved_at=datetime('now','localtime'), resolved_by=? WHERE id=?")
+                $pdo->prepare("UPDATE gdpr_requests SET status='completed', resolved_at=" . now_expr() . ", resolved_by=? WHERE id=?")
                     ->execute([$me['id'], $reqId]);
                 flash('Begäran genomförd — personuppgifter anonymiserade.');
             } else {
-                $pdo->prepare("UPDATE gdpr_requests SET status='rejected', notes=?, resolved_at=datetime('now','localtime'), resolved_by=? WHERE id=?")
+                $pdo->prepare("UPDATE gdpr_requests SET status='rejected', notes=?, resolved_at=" . now_expr() . ", resolved_by=? WHERE id=?")
                     ->execute([trim($_POST['reject_reason'] ?? ''), $me['id'], $reqId]);
                 flash('Begäran avvisad.');
             }

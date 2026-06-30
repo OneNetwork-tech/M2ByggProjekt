@@ -47,11 +47,10 @@ Upload all files to `public_html/` via cPanel File Manager or FTP.
 Make sure `.htaccess` is uploaded (enable "Show Hidden Files" in File Manager).
 
 ### 2. Set SMTP password
-Edit `/send/mailer.php` and replace `PASSWORD` on line:
-```php
-define('SMTP_PASS', 'PASSWORD');
-```
-with the real password.
+Log in to the CRM → **Inställningar** → **E-postkonton (SMTP)** → add the account
+(host, port, username, password) and mark it as default. This also covers the
+contact/partner form mailer in `/send/`, which reads the same configured account.
+See `DEPLOY.md` for full details, including how to support multiple accounts.
 
 ### 3. Permissions
 ```

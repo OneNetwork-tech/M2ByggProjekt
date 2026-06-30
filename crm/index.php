@@ -6,8 +6,11 @@ require_once __DIR__ . '/includes/crm-header.php';
 $pdo = db();
 
 // KPIs per blueprint: leads, conversion, quote acceptance, revenue, active/completed projects
+$startOfMonth = date('Y-m-01');
+$leadsMonthStmt = $pdo->prepare("SELECT COUNT(*) FROM leads WHERE created_at >= ?");
+$leadsMonthStmt->execute([$startOfMonth]);
 $kpi = [
-  'leads_month'   => $pdo->query("SELECT COUNT(*) FROM leads WHERE created_at >= date('now','start of month')")->fetchColumn(),
+  'leads_month'   => $leadsMonthStmt->fetchColumn(),
   'leads_total'   => $pdo->query("SELECT COUNT(*) FROM leads")->fetchColumn(),
   'leads_won'     => $pdo->query("SELECT COUNT(*) FROM leads WHERE stage='won'")->fetchColumn(),
   'leads_closed'  => $pdo->query("SELECT COUNT(*) FROM leads WHERE stage IN ('won','lost')")->fetchColumn(),
@@ -29,7 +32,7 @@ $myTasks->execute([$me['id']]); $myTasks = $myTasks->fetchAll();
 // Active projects
 $activeProjects = $pdo->query("SELECT p.*, c.name AS customer_name FROM projects p LEFT JOIN customers c ON c.id=p.customer_id WHERE p.status IN ('inspection','planning','scheduled','in_progress','quality') ORDER BY p.created_at DESC LIMIT 5")->fetchAll();
 // Overdue invoices
-$pdo->exec("UPDATE invoices SET status='overdue' WHERE status='sent' AND due_date < date('now')");
+$pdo->exec("UPDATE invoices SET status='overdue' WHERE status='sent' AND due_date < " . today_expr());
 $overdue = $pdo->query("SELECT i.*, c.name AS customer_name FROM invoices i LEFT JOIN customers c ON c.id=i.customer_id WHERE i.status='overdue' ORDER BY i.due_date LIMIT 4")->fetchAll();
 ?>
 

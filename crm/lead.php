@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'stage') {
         $stage = $_POST['stage'];
         if (isset(LEAD_STAGES[$stage])) {
-            $pdo->prepare("UPDATE leads SET stage=?, updated_at=datetime('now','localtime') WHERE id=?")->execute([$stage, $id]);
+            $pdo->prepare("UPDATE leads SET stage=?, updated_at=" . now_expr() . " WHERE id=?")->execute([$stage, $id]);
             log_timeline('lead', $id, 'status', 'Status ändrad till ' . LEAD_STAGES[$stage]['label'], '', $me['id']);
             audit('lead_stage', 'lead', $id, $stage);
             flash('Status uppdaterad.');
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'update') {
-        $pdo->prepare("UPDATE leads SET name=?, email=?, phone=?, address=?, city=?, service=?, value_estimate=?, updated_at=datetime('now','localtime') WHERE id=?")
+        $pdo->prepare("UPDATE leads SET name=?, email=?, phone=?, address=?, city=?, service=?, value_estimate=?, updated_at=" . now_expr() . " WHERE id=?")
             ->execute([trim($_POST['name']), trim($_POST['email']), trim($_POST['phone']), trim($_POST['address']), trim($_POST['city']), $_POST['service'], (float)$_POST['value_estimate'], $id]);
         flash('Lead uppdaterad.');
         header("Location: lead.php?id=$id"); exit;

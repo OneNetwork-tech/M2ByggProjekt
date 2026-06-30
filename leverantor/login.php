@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_password'])) {
         } else {
             db()->prepare("INSERT INTO supplier_users (supplier_id,email,password_hash) VALUES (?,?,?)")->execute([$inv['supplier_id'],$inv['email'],$hash]);
         }
-        db()->prepare("UPDATE supplier_invites SET used_at=datetime('now','localtime') WHERE token=?")->execute([$token]);
+        db()->prepare("UPDATE supplier_invites SET used_at=" . now_expr() . " WHERE token=?")->execute([$token]);
         supp_login($inv['email'], $pw);
         header('Location: /leverantor/'); exit;
     }
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['set_password'])) {
 <div class="portal-login" style="background:#1e3a8a">
   <div class="portal-login__card">
     <div class="portal-login__logo">
-      <div class="portal-login__logo-mark" style="background:#3b82f6;color:#fff">m2</div>
+      <img class="portal-login__logo-mark" src="/assets/images/M2-symbol-blk.svg" alt="M2">
       <div class="portal-login__logo-text">
         <strong>M2 Bygg Team</strong>
         <span><?= e(t('supplier.badge')) ?></span>

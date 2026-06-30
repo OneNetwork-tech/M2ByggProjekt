@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
 
             if ($id) {
-                $pdo->prepare("UPDATE services SET category=?, icon_key=?, title=?, slug=?, description=?, price_label=?, detail_body=?, cover_image=?, sort_order=?, visible=?, updated_at=datetime('now','localtime') WHERE id=?")
+                $pdo->prepare("UPDATE services SET category=?, icon_key=?, title=?, slug=?, description=?, price_label=?, detail_body=?, cover_image=?, sort_order=?, visible=?, updated_at=" . now_expr() . " WHERE id=?")
                     ->execute([...$fields, $id]);
                 audit('service_update', 'service', $id);
                 flash('Tjänst uppdaterad.');

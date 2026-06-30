@@ -33,7 +33,7 @@ $messages = [];
 if ($activePid) {
     // Mark staff messages as read
     db()->prepare(
-        "UPDATE portal_messages SET read_at = datetime('now','localtime')
+        "UPDATE portal_messages SET read_at = " . now_expr() . "
          WHERE project_id = ? AND sender_type = 'staff' AND read_at IS NULL"
     )->execute([$activePid]);
 

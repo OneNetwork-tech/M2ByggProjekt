@@ -5,7 +5,7 @@ $page_title       = 'M2 Bygg Team – Plattformen för bygg- och fastighetstjän
 $page_description = 'M2 är mer än ett byggbolag – en modern plattform som samordnar kvalitetssäkrade partners för tak, fasad, mark och mer. En kontaktpunkt. Tryggt och transparent. Göteborg & Västsverige.';
 $active_page      = 'hem';
 $breadcrumbs      = null; // homepage has no breadcrumb trail
-$lcp_image        = 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+$lcp_image        = '/uploads/site/hero-tak.avif';
 require_once __DIR__ . '/includes/header.php';
 
 $siteReviews = db()->query("
@@ -25,7 +25,7 @@ if (!function_exists('review_month_label')) {
 
 <!-- ═══ HERO — full-bleed house photo, asymmetric overlay, word-by-word headline ═══ -->
 <section class="hero" id="hero">
-  <div class="hero__bg" style="background-image:url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')"></div>
+  <div class="hero__bg" style="background-image:url('/uploads/site/hero-tak.avif')"></div>
   <div class="hero__overlay"></div>
   <div class="hero__bottom-fade"></div>
 
@@ -47,8 +47,8 @@ if (!function_exists('review_month_label')) {
       <h1 id="hero-h1">
         <?php
         $lines = current_lang() === 'en'
-          ? [['A', 'modern'], ['platform'], ['for', '<em>construction.</em>']]
-          : [['En', 'modern'], ['plattform'], ['för', '<em>byggtjänster.</em>']];
+          ? [['Your', 'reliable'], ['partner', 'for'], ['painting', '&'], ['<em>construction.</em>']]
+          : [['Din', 'pålitliga'], ['partner', 'för'], ['måleri', '&'], ['<em>byggtjänster.</em>']];
         foreach ($lines as $words) {
           foreach ($words as $word) {
             $isHtml = strpos($word, '<') !== false;

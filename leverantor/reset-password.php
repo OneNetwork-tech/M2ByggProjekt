@@ -42,7 +42,7 @@ if ($reset && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="portal-login" style="background:#1e3a8a">
   <div class="portal-login__card">
     <div class="portal-login__logo">
-      <div class="portal-login__logo-mark" style="background:#3b82f6;color:#fff">m2</div>
+      <img class="portal-login__logo-mark" src="/assets/images/M2-symbol-blk.svg" alt="M2">
       <div class="portal-login__logo-text">
         <strong>M2 Bygg Team</strong>
         <span><?= e(t('supplier.badge')) ?></span>

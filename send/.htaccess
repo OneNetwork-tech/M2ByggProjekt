@@ -1,0 +1,9 @@
+# M2 Platform — block direct access to mailer internals
+<FilesMatch "^(mailer|config\.local)\.php$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Deny from all
+  </IfModule>
+</FilesMatch>

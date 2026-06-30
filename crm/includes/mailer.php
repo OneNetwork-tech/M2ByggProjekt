@@ -32,9 +32,28 @@ if (!defined('SMTP_FROM_NAME')) define('SMTP_FROM_NAME', 'M2 Bygg Team AB');
  * @param string $entityType e.g. 'customer','supplier','quote','invoice' (for the log)
  * @param int    $entityId
  */
-function crm_send_mail(string $to, string $toName, string $subject, string $bodyHtml, string $entityType = '', int $entityId = 0, ?string $ctaUrl = null, ?string $ctaLabel = null): bool {
+function crm_send_mail(string $to, string $toName, string $subject, string $bodyHtml, string $entityType = '', int $entityId = 0, ?string $ctaUrl = null, ?string $ctaLabel = null, ?int $accountId = null, ?string $replyTo = 'info@m2team.se'): bool {
     $ok = false;
     $err = '';
+
+    $account  = $accountId ? get_email_account($accountId) : get_default_email_account();
+    $host     = $account['host']       ?? SMTP_HOST;
+    $port     = (int)($account['port'] ?? SMTP_PORT);
+    $username = $account['username']   ?? SMTP_USER;
+    $password = $account['password']   ?? SMTP_PASS;
+    $enc      = $account['encryption'] ?? 'ssl';
+
+    // System emails to customers/suppliers always identify as noreply@m2team.se with
+    // info@m2team.se as reply-to, regardless of which SMTP account relays the message —
+    // unless an account is explicitly chosen ($accountId set), in which case that
+    // account's own sender identity is used intentionally instead.
+    if ($accountId && $account) {
+        $fromMail = $account['from_email'];
+        $fromName = $account['from_name'];
+    } else {
+        $fromMail = SMTP_FROM;
+        $fromName = SMTP_FROM_NAME;
+    }
 
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
         $err = 'Ogiltig e-postadress';
@@ -44,14 +63,17 @@ function crm_send_mail(string $to, string $toName, string $subject, string $body
         $mail = new PHPMailer\PHPMailer\PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = SMTP_HOST;
+            $mail->Host       = $host;
             $mail->SMTPAuth   = true;
-            $mail->Username   = SMTP_USER;
-            $mail->Password   = SMTP_PASS;
-            $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-            $mail->Port       = SMTP_PORT;
+            $mail->Username   = $username;
+            $mail->Password   = $password;
+            $mail->SMTPSecure = $enc === 'tls' ? PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS : PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = $port;
             $mail->CharSet    = 'UTF-8';
-            $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
+            $mail->setFrom($fromMail, $fromName);
+            if ($replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
+                $mail->addReplyTo($replyTo, 'M2 Bygg Team AB');
+            }
             $mail->addAddress($to, $toName);
             $mail->isHTML(true);
             $mail->Subject = $subject;
@@ -84,9 +106,8 @@ function crm_mail_template(string $subject, string $body, ?string $ctaUrl = null
       body{font-family:'Helvetica Neue',Arial,sans-serif;background:#F6F4F0;margin:0;padding:0}
       .wrapper{max-width:600px;margin:32px auto}
       .header{background:#111318;padding:28px 32px;border-radius:12px 12px 0 0}
-      .logo-mark{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:#B5712A;border-radius:8px;color:#E8DCC8;font-family:Georgia,serif;font-size:16px;font-weight:bold}
+      .logo-mark{height:34px;width:auto;vertical-align:middle;display:inline-block}
       .logo-text{display:inline-block;vertical-align:middle;margin-left:10px}
-      .logo-name{font-family:Georgia,serif;font-size:18px;color:#F6F4F0;display:block}
       .logo-tag{font-size:11px;color:rgba(246,244,240,.4);letter-spacing:.1em;text-transform:uppercase}
       .content{background:#fff;padding:36px 32px;border-radius:0 0 12px 12px}
       h2{font-family:Georgia,serif;color:#111318;font-size:22px;margin:0 0 20px}
@@ -94,7 +115,7 @@ function crm_mail_template(string $subject, string $body, ?string $ctaUrl = null
       .footer-note{font-size:12px;color:#9CA3AF;margin-top:24px;text-align:center;line-height:1.6}
     </style></head><body>
       <div class="wrapper">
-        <div class="header"><span class="logo-mark">m2</span><span class="logo-text"><span class="logo-name">M2 Bygg Team AB</span><span class="logo-tag">Göteborg · Hisings Backa</span></span></div>
+        <div class="header"><img class="logo-mark" src="https://m2team.se/assets/images/M2-AB-logotyp-wht.png" alt="M2 Bygg Team AB"><span class="logo-text"><span class="logo-tag">Göteborg · Hisings Backa</span></span></div>
         <div class="content"><h2>{$subject}</h2>{$body}{$cta}</div>
         <p class="footer-note">M2 Bygg Team AB · Lillhagsvägen 88, 442 43 Hisings Backa<br>031-96 88 88 · info@m2team.se · www.m2team.se</p>
       </div>

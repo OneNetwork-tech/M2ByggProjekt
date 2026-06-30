@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($status === 'published' && !$publishedAt) {
                     $publishedAt = date('Y-m-d H:i:s');
                 }
-                $pdo->prepare("UPDATE blog_posts SET title=?, slug=?, excerpt=?, body=?, cover_image=?, category=?, status=?, read_minutes=?, published_at=?, updated_at=datetime('now','localtime') WHERE id=?")
+                $pdo->prepare("UPDATE blog_posts SET title=?, slug=?, excerpt=?, body=?, cover_image=?, category=?, status=?, read_minutes=?, published_at=?, updated_at=" . now_expr() . " WHERE id=?")
                     ->execute([$title, $slug, trim($_POST['excerpt'] ?? ''), $_POST['body'] ?? '', trim($_POST['cover_image'] ?? ''), $_POST['category'] ?? 'tak', $status, $readMinutes, $publishedAt, $id]);
                 audit('blog_post_update', 'blog_post', $id);
                 flash('Inlägg uppdaterat.');

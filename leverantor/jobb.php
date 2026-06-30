@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['respond'])) {
     $s = db()->prepare("SELECT id FROM job_assignments WHERE id=? AND supplier_id=?");
     $s->execute([$jid, $sid]);
     if ($s->fetch()) {
-        db()->prepare("UPDATE job_assignments SET status=?, supplier_note=?, responded_at=datetime('now','localtime') WHERE id=?")
+        db()->prepare("UPDATE job_assignments SET status=?, supplier_note=?, responded_at=" . now_expr() . " WHERE id=?")
            ->execute([$action, $note, $jid]);
     }
     header('Location: /leverantor/jobb.php?id='.$jid); exit;

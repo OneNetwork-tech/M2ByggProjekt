@@ -6,7 +6,7 @@ require_role(['finance','sales']);
 $pdo = db();
 
 // refresh overdue
-$pdo->exec("UPDATE invoices SET status='overdue' WHERE status='sent' AND due_date < date('now')");
+$pdo->exec("UPDATE invoices SET status='overdue' WHERE status='sent' AND due_date < " . today_expr());
 
 $filter = $_GET['status'] ?? 'all';
 $where = $filter !== 'all' ? "WHERE i.status = " . $pdo->quote($filter) : '';

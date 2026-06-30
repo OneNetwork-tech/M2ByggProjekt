@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_password'])) {
             db()->prepare("INSERT INTO portal_users (customer_id, email, password_hash) VALUES (?,?,?)")->execute([$inv['customer_id'], $inv['email'], $hash]);
         }
         // Mark invite used
-        db()->prepare("UPDATE portal_invites SET used_at = datetime('now','localtime') WHERE token = ?")->execute([$token]);
+        db()->prepare("UPDATE portal_invites SET used_at = " . now_expr() . " WHERE token = ?")->execute([$token]);
         // Auto-login
         portal_login($inv['email'], $pw);
         header('Location: /portal/');
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['set_password'])) {
 <div class="portal-login">
   <div class="portal-login__card">
     <div class="portal-login__logo">
-      <div class="portal-login__logo-mark">m2</div>
+      <img class="portal-login__logo-mark" src="/assets/images/M2-symbol-blk.svg" alt="M2">
       <div class="portal-login__logo-text">
         <strong>M2 Bygg Team</strong>
         <span><?= e(t('portal.badge')) ?></span>

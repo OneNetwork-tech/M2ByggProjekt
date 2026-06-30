@@ -9,13 +9,17 @@ define('APP_URL',     'https://www.m2team.se/crm');
 define('APP_VERSION', '1.0.0');
 
 // ── DATABASE ──────────────────────────────────────────────
-define('DB_DRIVER', 'sqlite');                       // 'sqlite' | 'mysql'
 define('DB_SQLITE_PATH', __DIR__ . '/../data/m2platform.sqlite');
-// MySQL settings (used when DB_DRIVER = 'mysql'):
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'm2team_platform');
-define('DB_USER', 'm2team_crm');
-define('DB_PASS', 'CHANGE_ME');
+
+// Local dev (no config.local.php present) defaults to zero-config SQLite. Production on
+// cPanel switches to MySQL via config.local.php — a file that is NOT committed to git (see
+// .gitignore) and must be created directly on the server (cPanel File Manager), so the real
+// DB_HOST/DB_NAME/DB_USER/DB_PASS never end up in the GitHub repo.
+if (file_exists(__DIR__ . '/config.local.php')) {
+    require __DIR__ . '/config.local.php';   // must define DB_DRIVER='mysql' + DB_HOST/DB_NAME/DB_USER/DB_PASS
+} else {
+    define('DB_DRIVER', 'sqlite');
+}
 
 // ── SECURITY ──────────────────────────────────────────────
 define('SESSION_NAME', 'm2platform_session');
@@ -50,11 +54,18 @@ define('GOOGLE_REVIEW_URL', 'https://g.page/r/review'); // TODO: replace with re
 // ── ROLES ─────────────────────────────────────────────────
 const ROLES = [
   'super_admin' => 'Super Admin',
+  'admin'       => 'Admin',
   'sales'       => 'Säljansvarig',
   'project'     => 'Projektledare',
   'finance'     => 'Ekonomi',
   'support'     => 'Kundsupport',
 ];
+
+// Roles that are considered "admin-tier" — only super_admin may create, promote into,
+// demote out of, or deactivate accounts with one of these roles. The 'admin' role itself
+// has full app access (see require_role() in crm/includes/auth.php) but is blocked from
+// managing other admin-tier accounts, so it can't grant itself or anyone else super_admin.
+const ADMIN_TIER_ROLES = ['super_admin', 'admin'];
 
 // ── LEAD STAGES (per blueprint) ───────────────────────────
 const LEAD_STAGES = [
@@ -96,6 +107,16 @@ const INVOICE_STATUSES = [
   'paid'      => ['label' => 'Betald',        'color' => '#059669'],
   'overdue'   => ['label' => 'Förfallen',     'color' => '#DC2626'],
   'cancelled' => ['label' => 'Makulerad',     'color' => '#374151'],
+];
+
+// ── SUPPLIER (LEVERANTÖR) INVOICE STATUSES ────────────────
+// Separate from INVOICE_STATUSES above: these are invoices suppliers submit to M2 for
+// completed work (payables), not invoices M2 sends to customers (receivables).
+const SUPPLIER_INVOICE_STATUSES = [
+  'pending'  => ['label' => 'Väntar granskning', 'color' => '#D97706'],
+  'approved' => ['label' => 'Godkänd',           'color' => '#0891B2'],
+  'paid'     => ['label' => 'Betald',            'color' => '#059669'],
+  'rejected' => ['label' => 'Avvisad',           'color' => '#DC2626'],
 ];
 
 const SUPPLIER_STATUSES = [

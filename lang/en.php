@@ -46,7 +46,7 @@ return [
     'dash.unpaid_amount'      => 'Unpaid amount',
 
     // Homepage hero
-    'home.hero_sub'        => 'M2 coordinates a network of quality-assured partners.<br>You have <strong style="color:var(--gold-lt)">one point of contact</strong> – we handle the rest.',
+    'home.hero_sub'        => 'We are experts in everything roof and facade related.<br>Contact us today for a <strong style="color:var(--gold-lt)">free consultation</strong>.',
     'home.cta_start'       => 'Get started – free of charge',
     'home.cta_how'         => 'How it works',
     'home.trust_contact'      => 'One point of contact',

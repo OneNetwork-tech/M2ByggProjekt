@@ -2,8 +2,9 @@
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/mailer.php';
-$me = require_role([]); // super_admin only
+$me = require_role(['admin']); // super_admin + admin (admin-tier restrictions enforced below)
 $pdo = db();
+$isSuperAdmin = $me['role'] === 'super_admin';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -13,7 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = strtolower(trim($_POST['email']));
         $name  = trim($_POST['name']);
         $exists = $pdo->prepare("SELECT id FROM users WHERE email=?"); $exists->execute([$email]);
-        if ($exists->fetchColumn()) {
+        if (!$isSuperAdmin && in_array($_POST['role'], ADMIN_TIER_ROLES)) {
+            flash('Du har inte behörighet att skapa admin-konton.', 'error');
+        } elseif ($exists->fetchColumn()) {
             flash('E-postadressen finns redan.', 'error');
         } elseif (strlen($_POST['password'] ?? '') < 8) {
             flash('Lösenordet måste vara minst 8 tecken.', 'error');
@@ -42,7 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'toggle') {
         $uid = (int)$_POST['id'];
-        if ($uid !== (int)$me['id']) {
+        $target = $pdo->prepare("SELECT role FROM users WHERE id=?"); $target->execute([$uid]); $targetRole = $target->fetchColumn();
+        if (!$isSuperAdmin && in_array($targetRole, ADMIN_TIER_ROLES)) {
+            flash('Du har inte behörighet att ändra status för admin-konton.', 'error');
+        } elseif ($uid !== (int)$me['id']) {
             $pdo->prepare("UPDATE users SET active = 1 - active WHERE id=?")->execute([$uid]);
             audit('user_toggle', 'user', $uid);
             flash('Användarstatus ändrad.');
@@ -52,7 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'role') {
         $uid = (int)$_POST['id'];
-        if ($uid !== (int)$me['id'] && isset(ROLES[$_POST['role']])) {
+        $target = $pdo->prepare("SELECT role FROM users WHERE id=?"); $target->execute([$uid]); $targetRole = $target->fetchColumn();
+        if (!$isSuperAdmin && (in_array($targetRole, ADMIN_TIER_ROLES) || in_array($_POST['role'], ADMIN_TIER_ROLES))) {
+            flash('Du har inte behörighet att ändra roll för admin-konton eller tilldela admin-roller.', 'error');
+        } elseif ($uid !== (int)$me['id'] && isset(ROLES[$_POST['role']])) {
             $pdo->prepare("UPDATE users SET role=? WHERE id=?")->execute([$_POST['role'], $uid]);
             audit('user_role', 'user', $uid, $_POST['role']);
             flash('Roll uppdaterad.');
@@ -62,7 +71,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'password') {
         $uid = (int)$_POST['id'];
-        if (strlen($_POST['password']) >= 8) {
+        $target = $pdo->prepare("SELECT role FROM users WHERE id=?"); $target->execute([$uid]); $targetRole = $target->fetchColumn();
+        if (!$isSuperAdmin && in_array($targetRole, ADMIN_TIER_ROLES) && $uid !== (int)$me['id']) {
+            flash('Du har inte behörighet att byta lösenord för admin-konton.', 'error');
+        } elseif (strlen($_POST['password']) >= 8) {
             $pdo->prepare("UPDATE users SET password_hash=? WHERE id=?")->execute([password_hash($_POST['password'], PASSWORD_DEFAULT), $uid]);
             audit('user_password', 'user', $uid);
             flash('Lösenord uppdaterat.');
@@ -96,6 +108,7 @@ require_once __DIR__ . '/includes/crm-header.php';
 <div class="card card--pad" style="margin-bottom:16px;background:var(--blue-lt);border-color:#BFDBFE">
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:12.5px">
     <div><strong style="color:var(--blue)">Super Admin</strong><br><span style="color:var(--ink-soft)">Full åtkomst till allt</span></div>
+    <div><strong style="color:var(--blue)">Admin</strong><br><span style="color:var(--ink-soft)">Allt utom att skapa/ta bort admin-konton</span></div>
     <div><strong style="color:var(--blue)">Säljansvarig</strong><br><span style="color:var(--ink-soft)">Leads, offerter, kunder</span></div>
     <div><strong style="color:var(--blue)">Projektledare</strong><br><span style="color:var(--ink-soft)">Projekt, leverantörer, schema</span></div>
     <div><strong style="color:var(--blue)">Ekonomi</strong><br><span style="color:var(--ink-soft)">Fakturor, betalningar</span></div>
@@ -116,14 +129,17 @@ require_once __DIR__ . '/includes/crm-header.php';
               <div><div style="font-weight:550"><?= e($u['name']) ?></div><div style="font-size:11.5px;color:var(--gray-lt)"><?= e($u['email']) ?></div></div>
             </div>
           </td>
+          <?php $targetIsAdminTier = in_array($u['role'], ADMIN_TIER_ROLES); $locked = !$isSuperAdmin && $targetIsAdminTier; ?>
           <td>
             <?php if ($u['id'] == $me['id']): ?>
             <span class="badge" style="background:var(--blue-lt);color:var(--blue)"><?= e(ROLES[$u['role']]) ?> (du)</span>
+            <?php elseif ($locked): ?>
+            <span class="badge" style="background:var(--blue-lt);color:var(--blue)" title="Endast Super Admin kan ändra admin-roller"><?= e(ROLES[$u['role']]) ?></span>
             <?php else: ?>
             <form method="POST" style="display:flex;gap:6px">
               <?= csrf_field() ?><input type="hidden" name="action" value="role"><input type="hidden" name="id" value="<?= $u['id'] ?>">
               <select class="fs" name="role" style="padding:5px 9px;font-size:12px;width:auto" onchange="this.form.submit()">
-                <?php foreach (ROLES as $rk => $rl): ?>
+                <?php foreach (ROLES as $rk => $rl): if (!$isSuperAdmin && in_array($rk, ADMIN_TIER_ROLES)) continue; ?>
                 <option value="<?= $rk ?>" <?= $u['role']===$rk?'selected':'' ?>><?= e($rl) ?></option>
                 <?php endforeach; ?>
               </select>
@@ -134,8 +150,10 @@ require_once __DIR__ . '/includes/crm-header.php';
           <td style="font-size:12.5px;color:var(--gray)"><?= $u['last_login'] ? time_ago($u['last_login']) : 'Aldrig' ?></td>
           <td>
             <div style="display:flex;gap:6px">
+              <?php if (!$locked): ?>
               <button class="btn btn--ghost btn--sm" onclick="document.getElementById('pwId').value='<?= $u['id'] ?>';document.getElementById('pwName').textContent='<?= e($u['name']) ?>';openModal('pwModal')">Lösenord</button>
-              <?php if ($u['id'] != $me['id']): ?>
+              <?php endif; ?>
+              <?php if ($u['id'] != $me['id'] && !$locked): ?>
               <form method="POST"><?= csrf_field() ?><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="<?= $u['id'] ?>">
                 <button class="btn <?= $u['active'] ? 'btn--danger' : 'btn--green' ?> btn--sm"><?= $u['active'] ? 'Stäng av' : 'Aktivera' ?></button>
               </form>
@@ -162,10 +180,13 @@ require_once __DIR__ . '/includes/crm-header.php';
       <div class="frow">
         <div class="fg"><label>Roll</label>
           <select class="fs" name="role">
-            <?php foreach (ROLES as $rk => $rl): if ($rk === 'super_admin') continue; ?>
+            <?php foreach (ROLES as $rk => $rl): if (in_array($rk, ADMIN_TIER_ROLES)) continue; ?>
             <option value="<?= $rk ?>"><?= e($rl) ?></option>
             <?php endforeach; ?>
+            <?php if ($isSuperAdmin): ?>
+            <option value="admin">Admin</option>
             <option value="super_admin">Super Admin</option>
+            <?php endif; ?>
           </select>
         </div>
         <div class="fg"><label>Lösenord * (min 8)</label><input class="fi" type="text" name="password" minlength="8" required></div>

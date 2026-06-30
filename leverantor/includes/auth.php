@@ -44,7 +44,7 @@ function supp_login(string $email, string $password): bool {
     $su = $s->fetch();
     if (!$su || !password_verify($password, $su['password_hash'])) return false;
     $_SESSION['supp_user_id'] = $su['id'];
-    db()->prepare("UPDATE supplier_users SET last_login = datetime('now','localtime') WHERE id = ?")
+    db()->prepare("UPDATE supplier_users SET last_login = " . now_expr() . " WHERE id = ?")
        ->execute([$su['id']]);
     return true;
 }
@@ -61,7 +61,7 @@ function supp_validate_invite(string $token): ?array {
     $s = db()->prepare(
         "SELECT si.*, s.company, s.email AS s_email
          FROM supplier_invites si JOIN suppliers s ON s.id = si.supplier_id
-         WHERE si.token = ? AND si.used_at IS NULL AND si.expires_at > datetime('now','localtime')"
+         WHERE si.token = ? AND si.used_at IS NULL AND si.expires_at > " . now_expr() . ""
     );
     $s->execute([$token]);
     return $s->fetch() ?: null;

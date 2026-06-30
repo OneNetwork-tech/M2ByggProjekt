@@ -1,6 +1,6 @@
 <?php
 $page_title       = 'Tak & Fasad Hisingen – Fast Pris & ROT-avdrag';
-$page_description = 'M2 Bygg Team AB – tak, fasad och plåtarbeten i Hisingen. Fast pris, ROT-avdrag, 5 år garanti. Lokala hantverkare. Ring 031-96 88 88.';
+$page_description = 'M2 Bygg Team AB – tak, fasad och plåtarbeten i Hisingen. Fast pris och ROT-avdrag. Lokala hantverkare. Ring 031-96 88 88.';
 $active_page      = '';
 $breadcrumbs      = [['Hem', '/'], ['Hisingen', null]];
 require_once __DIR__ . '/../includes/header.php';
@@ -22,9 +22,9 @@ require_once __DIR__ . '/../includes/header.php';
     <div style="max-width:600px">
       <p class="eyebrow animate-in" style="color:var(--copper-lt);margin-bottom:18px">Lokala hantverkare</p>
       <h1 class="animate-in delay-1" style="margin-bottom:14px">Tak &amp; fasad<br>i Hisingen</h1>
-      <p class="animate-in delay-2">Tak och fasad i Hisingen – Hisings Backa, Biskopsgården, Torslanda och Öckerö. Fast pris, ROT-avdrag och 5 år garanti.</p>
+      <p class="animate-in delay-2">Tak och fasad i Hisingen – Hisings Backa, Biskopsgården, Torslanda och Öckerö..</p>
       <ul style="list-style:none;margin:24px 0 28px;display:flex;flex-direction:column;gap:10px" class="animate-in delay-3">
-        <?php foreach(['Fast pris – prisgaranti ingår alltid','ROT-avdrag – vi hanterar ansökan','5 år garanti på allt arbete','Svar och offert inom 24 timmar'] as $c): ?>
+        <?php foreach(['Fast pris – prisgaranti ingår alltid','ROT-avdrag – vi hanterar ansökan','Kostnadsfri offert','Svar och offert inom 24 timmar'] as $c): ?>
         <li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--copper-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <?=$c?>
@@ -46,7 +46,7 @@ require_once __DIR__ . '/../includes/header.php';
 </section>
 
 <div class="trust-strip"><div class="container"><div class="trust-strip__grid">
-<?php foreach([['Fast pris','Prisgaranti alltid'],['ROT-avdrag','Vi hanterar ansökan'],['5 år garanti','På allt arbete'],['Svar 24h','Gratis offert']] as $t): ?>
+<?php foreach([['Fast pris','Prisgaranti alltid'],['ROT-avdrag','Vi hanterar ansökan'],['Kostnadsfri offert','Inom 24h'],['Svar 24h','Gratis offert']] as $t): ?>
 <div class="trust-item"><div class="trust-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="trust-item__text"><strong><?=$t[0]?></strong><span><?=$t[1]?></span></div></div>
 <?php endforeach; ?>
 </div></div></div>
@@ -56,7 +56,7 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="section-header reveal" style="margin-bottom:32px">
       <p class="eyebrow">Tjänster i Hisingen</p>
       <h2>Vad vi gör i Hisingen</h2>
-      <p>Alla tjänster med fast pris och 5 år garanti.</p>
+      <p>Alla tjänster med fast pris och ROT-avdrag.</p>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px" class="reveal-group">
       <?php foreach([
@@ -139,7 +139,7 @@ require_once __DIR__ . '/../includes/header.php';
       <div class="reveal">
         <p class="eyebrow" style="color:var(--copper-lt);margin-bottom:12px">Behöver du hjälp i Hisingen?</p>
         <h2 style="margin-bottom:8px">Gratis offert inom 24h</h2>
-        <p>Lokala hantverkare, fast pris och 5 år garanti.</p>
+        <p>Lokala hantverkare och fast pris.</p>
       </div>
       <div class="reveal" style="display:flex;gap:12px;flex-wrap:wrap;flex-shrink:0">
         <a href="tel:031968888" class="btn btn--outline-white btn--lg">

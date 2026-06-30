@@ -5,7 +5,7 @@
  */
 $site_name   = 'M2 Bygg Team AB';
 $base_url    = 'https://www.m2team.se';
-$phone1      = '031-96 88 88';
+$phone1      = '073 240 50 26';
 $phone1_raw  = '031968888';
 $phone2      = '0732-40 50 26';
 $phone2_raw  = '0732405026';
@@ -15,7 +15,7 @@ $instagram   = 'https://www.instagram.com/m2byggteam/';
 $facebook    = 'https://www.facebook.com/profile.php?id=61577099783558';
 
 $page_title       = $page_title       ?? $site_name;
-$page_description = $page_description ?? 'M2 Bygg Team AB – Professionella tak- och fasadarbeten i Göteborg. Fast pris, ROT-avdrag och 5 år garanti.';
+$page_description = $page_description ?? 'M2 Bygg Team AB – Professionella tak- och fasadarbeten i Göteborg. Fast pris och ROT-avdrag.';
 $page_canonical   = $page_canonical   ?? $base_url . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $active_page      = $active_page      ?? '';
 $og_image         = $og_image         ?? $base_url . '/assets/images/hero-house.webp';
@@ -24,24 +24,21 @@ $page_lang        = function_exists('current_lang') ? current_lang() : 'sv';
 $breadcrumbs      = $breadcrumbs ?? null;
 
 $nav_service_groups = [
-  'Tak' => [
-    ['Takbyte',       '/tjanster/takbyte'],
-    ['Takrenovering', '/tjanster/takrenovering'],
-    ['Takmålning',    '/tjanster/takmalning'],
-    ['Taktvätt',      '/tjanster/taktvatt'],
-    ['Plåtarbeten',   '/tjanster/platarbeten'],
+  'Takläggning' => [
+    ['Betongtak', '/taklaggning/betongtak'],
+    ['Plåttak',   '/taklaggning/plattak'],
+    ['Papptak',   '/taklaggning/papptak'],
   ],
-  'Fasad' => [
-    ['Fasadmålning',    '/tjanster/fasadmalning'],
-    ['Fasadrenovering', '/tjanster/fasadrenovering'],
-    ['Fasadtvätt',      '/tjanster/fasadtvatt'],
-    ['Klä in fasad',    '/tjanster/kladinfasad'],
-    ['Balkongmålning',  '/tjanster/balkongmalning'],
+  'Målning' => [
+    ['Fasadmålning',    '/malning/fasadmalning'],
+    ['Takmålning',      '/malning/takmalning'],
+    ['Inomhusmålning',  '/malning/inomhusmalning'],
+    ['Övrig målning',   '/malning/ovrig-malning'],
   ],
-  'Mark & övrigt' => [
-    ['Markarbete',      '/tjanster/markarbete'],
-    ['Stenläggning',    '/tjanster/stenlaggning'],
-    ['Klottersanering', '/tjanster/klottersanering'],
+  'Renovering & tvätt' => [
+    ['Renovering',      '/renovering'],
+    ['Taktvätt',        '/tak-fasadtvatt/taktvatt'],
+    ['Fasadtvätt',       '/tak-fasadtvatt/fasadtvatt'],
   ],
 ];
 // Flat list — used by the mobile menu, which stays single-column.
@@ -189,11 +186,11 @@ $schemaTopReviews  = $schemaReviewCount > 0 ? db()->query(
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </a>
           <div class="nav__dropdown nav__dropdown--cols">
-            <?php foreach ($nav_service_groups as $groupName => $items): ?>
+            <?php foreach ($nav_service_groups as $groupName => $navGroupItems): ?>
             <div class="nav__dropdown-col">
               <div class="nav__dropdown-heading"><?= e($groupName) ?></div>
               <ul role="list">
-                <?php foreach ($items as $s): ?>
+                <?php foreach ($navGroupItems as $s): ?>
                 <li><a href="<?= e($s[1]) ?>"><?= e($s[0]) ?></a></li>
                 <?php endforeach; ?>
               </ul>
@@ -201,10 +198,9 @@ $schemaTopReviews  = $schemaReviewCount > 0 ? db()->query(
             <?php endforeach; ?>
           </div>
         </li>
-        <li><a href="/om-oss" class="<?= $active_page==='om-oss'?'active':'' ?>" <?= $active_page==='om-oss'?'aria-current="page"':'' ?>>Så fungerar det</a></li>
+        
+        <li><a href="/galleri" class="<?= $active_page==='galleri'?'active':'' ?>" <?= $active_page==='galleri'?'aria-current="page"':'' ?>>Galleri</a></li>
         <li><a href="/fastighet" class="<?= $active_page==='fastighet'?'active':'' ?>" <?= $active_page==='fastighet'?'aria-current="page"':'' ?>>För fastigheter</a></li>
-        <li><a href="/projekt" class="<?= $active_page==='projekt'?'active':'' ?>" <?= $active_page==='projekt'?'aria-current="page"':'' ?>>Projekt</a></li>
-        <li><a href="/om-oss#om-oss" class="<?= $active_page==='om-oss'?'active':'' ?>">Om oss</a></li>
         <li><a href="/kontakt" class="<?= $active_page==='kontakt'?'active':'' ?>" <?= $active_page==='kontakt'?'aria-current="page"':'' ?>>Kontakt</a></li>
       </ul>
 
@@ -235,10 +231,10 @@ $schemaTopReviews  = $schemaReviewCount > 0 ? db()->query(
         <?php foreach ($nav_services as $s): ?><li><a href="<?= e($s[1]) ?>"><?= e($s[0]) ?></a></li><?php endforeach; ?>
       </ul>
     </li>
-    <li><a href="/om-oss">Så fungerar det</a></li>
+    <li><a href="/om-oss">Om oss</a></li>
+    <li><a href="/galleri">Galleri</a></li>
     <li><a href="/fastighet">För fastigheter</a></li>
     <li><a href="/projekt">Projekt</a></li>
-    <li><a href="/om-oss#om-oss">Om oss</a></li>
     <li><a href="/kontakt">Kontakt</a></li>
   </ul>
   <div style="display:flex;flex-direction:column;gap:10px;margin-top:32px">

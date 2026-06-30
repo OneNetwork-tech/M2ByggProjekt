@@ -1,6 +1,6 @@
 # M2 Platform — CRM directory hardening
 
-<FilesMatch "^(migrate-to-mysql|cron-backup|cron-invoice-reminders|config)\.php$">
+<FilesMatch "^(migrate-to-mysql|cron-backup|cron-invoice-reminders|config|config\.local)\.php$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

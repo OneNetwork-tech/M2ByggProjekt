@@ -11,6 +11,7 @@ data/portal-uploads/*
 # ── Secrets / local config ──
 .env
 config.local.php
+config.local.php.*
 
 # ── OS / editor junk ──
 .DS_Store

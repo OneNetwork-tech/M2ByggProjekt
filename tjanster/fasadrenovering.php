@@ -23,7 +23,7 @@ require_once __DIR__ . '/../includes/header.php';
       <ul style="list-style:none;margin:24px 0 28px;display:flex;flex-direction:column;gap:10px" class="animate-in delay-3"><li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--copper-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Komplett renovering – lagning, grundning och finish</li>
 <li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--copper-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Puts, trä och alla fasadtyper</li>
 <li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--copper-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Åtgärdar orsaken till skadorna</li>
-<li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--copper-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>5 år garanti på allt arbete</li></ul>
+<li style="display:flex;align-items:center;gap:10px;color:rgba(245,245,247,.78);font-size:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:17px;height:17px;color:var(--copper-lt);flex-shrink:0"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Kostnadsfri offert inom 24h</li></ul>
       <div class="animate-in delay-4" style="display:flex;gap:12px;flex-wrap:wrap">
         <a href="/offert" class="btn btn--primary btn--lg">
           <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
@@ -38,7 +38,7 @@ require_once __DIR__ . '/../includes/header.php';
   </div>
 </section>
 <div class="trust-strip"><div class="container"><div class="trust-strip__grid">
-<?php foreach([['Fast pris','Prisgaranti alltid'],['ROT-avdrag','Vi hanterar ansökan'],['5 år garanti','På allt arbete'],['Svar inom 24h','Gratis besiktning']] as $t): ?>
+<?php foreach([['Fast pris','Prisgaranti alltid'],['ROT-avdrag','Vi hanterar ansökan'],['Svar inom 24h','Gratis besiktning']] as $t): ?>
 <div class="trust-item"><div class="trust-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="trust-item__text"><strong><?=$t[0]?></strong><span><?=$t[1]?></span></div></div>
 <?php endforeach; ?>
 </div></div></div>
@@ -53,7 +53,7 @@ require_once __DIR__ . '/../includes/header.php';
         <h2 style="margin-bottom:12px">Mer än bara målning</h2>
         <p style="color:var(--steel);line-height:1.72;margin-bottom:28px">En professionell fasadrenovering är mer än ytbehandling. Vi inspekterar, lagar alla skador, grundar ordentligt och väljer rätt ytmaterial för din fasadtyp och klimat.</p>
         <div style="display:flex;flex-direction:column;gap:14px" class="reveal-group">
-<?php foreach([['Fast pris alltid','Det pris vi offererar är det du betalar. Prisgaranti ingår.'],['5 år garanti','Allt arbete täcks av 5 år garanti. Uppstår problem åtgärdar vi kostnadsfritt.'],['ROT-avdrag','30% av arbetskostnaden tillbaka. Vi hanterar ansökan till Skatteverket.']] as $i=>[$h,$p]): ?>
+<?php foreach([['Fast pris alltid','Det pris vi offererar är det du betalar. Prisgaranti ingår.'],['ROT-avdrag','30% av arbetskostnaden tillbaka. Vi hanterar ansökan till Skatteverket.']] as $i=>[$h,$p]): ?>
 <div class="reveal" style="display:flex;gap:13px;align-items:flex-start">
   <div style="min-width:34px;height:34px;background:rgba(181,113,42,.1);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-display);font-weight:700;font-size:13px;color:var(--copper)">0<?=$i+1?></div>
   <div><h4 style="margin-bottom:3px"><?=$h?></h4><p style="font-size:14px;color:var(--steel);line-height:1.6"><?=$p?></p></div>

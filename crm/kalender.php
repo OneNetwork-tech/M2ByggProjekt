@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <div class="card card--pad" style="margin-top:20px">
   <h3 style="font-size:14.5px;margin-bottom:14px">Kommande bokade besök</h3>
   <?php
-  $upcoming = $pdo->prepare("
+  $upcoming = $pdo->query("
       SELECT sv.*, l.name AS lead_name, c.name AS customer_name, p.title AS project_title, s.company AS supplier_company, u.name AS assigned_name
       FROM site_visits sv
       LEFT JOIN leads l ON l.id = sv.lead_id
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
       LEFT JOIN projects p ON p.id = sv.project_id
       LEFT JOIN suppliers s ON s.id = sv.supplier_id
       LEFT JOIN users u ON u.id = sv.assigned_to
-      WHERE sv.visit_date >= date('now') AND sv.visit_date < date('now','+14 days')
+      WHERE sv.visit_date >= " . today_expr() . " AND sv.visit_date < " . date_offset_expr(14) . "
       ORDER BY sv.visit_date, sv.visit_time LIMIT 20
   ")->fetchAll();
   ?>
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
   $upcomingMeetings = $pdo->query("
       SELECT m.*, u.name AS created_by_name
       FROM meetings m LEFT JOIN users u ON u.id = m.created_by
-      WHERE m.meeting_date >= date('now') AND m.meeting_date < date('now','+14 days')
+      WHERE m.meeting_date >= " . today_expr() . " AND m.meeting_date < " . date_offset_expr(14) . "
       ORDER BY m.meeting_date, m.start_time LIMIT 20
   ")->fetchAll();
   $contactTypeLabels = ['customer' => 'Kund', 'supplier' => 'Leverantör', 'contact' => 'Kontakt'];

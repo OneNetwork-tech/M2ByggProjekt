@@ -31,7 +31,7 @@ if ('serviceWorker' in navigator) {
 <body>
 <header class="portal-topbar">
   <a href="/portal/" class="portal-topbar__logo">
-    <div class="portal-topbar__logo-mark">m2</div>
+    <img class="portal-topbar__logo-mark" src="/assets/images/M2-symbol-wht.svg" alt="M2">
     M2 Bygg Team
     <span class="portal-topbar__badge"><?= e(t('portal.badge')) ?></span>
   </a>

@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existing = $pdo->prepare("SELECT id FROM supplier_ratings WHERE job_assignment_id = ?");
             $existing->execute([$jaId]);
             if ($existing->fetchColumn()) {
-                $pdo->prepare("UPDATE supplier_ratings SET rating=?, note=?, rated_by=?, created_at=datetime('now','localtime') WHERE job_assignment_id=?")
+                $pdo->prepare("UPDATE supplier_ratings SET rating=?, note=?, rated_by=?, created_at=" . now_expr() . " WHERE job_assignment_id=?")
                     ->execute([$rating, $note, $me['id'], $jaId]);
             } else {
                 $pdo->prepare("INSERT INTO supplier_ratings (job_assignment_id, supplier_id, project_id, rating, note, rated_by) VALUES (?,?,?,?,?,?)")

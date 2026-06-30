@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $token   = bin2hex(random_bytes(24));
         $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
-        db()->prepare("UPDATE portal_invites SET used_at = datetime('now') WHERE customer_id = ? AND used_at IS NULL")
+        db()->prepare("UPDATE portal_invites SET used_at = " . now_expr() . " WHERE customer_id = ? AND used_at IS NULL")
             ->execute([$cid]);
         db()->prepare("INSERT INTO portal_invites (customer_id, token, email, expires_at) VALUES (?,?,?,?)")
             ->execute([$cid, $token, $email, $expires]);

@@ -85,9 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!isset(QUOTE_STATUSES[$status])) { header("Location: offert.php?id=$id"); exit; }
 
         $extra = '';
-        if ($status === 'sent')     $extra = ", sent_at = datetime('now','localtime')";
-        if ($status === 'viewed')   $extra = ", viewed_at = datetime('now','localtime')";
-        if ($status === 'accepted') $extra = ", accepted_at = datetime('now','localtime')";
+        if ($status === 'sent')     $extra = ", sent_at = " . now_expr() . "";
+        if ($status === 'viewed')   $extra = ", viewed_at = " . now_expr() . "";
+        if ($status === 'accepted') $extra = ", accepted_at = " . now_expr() . "";
         $pdo->prepare("UPDATE quotes SET status=? $extra WHERE id=?")->execute([$status, $id]);
         log_timeline('quote', $id, 'status', 'Status: ' . QUOTE_STATUSES[$status]['label'], '', $me['id']);
         audit('quote_status', 'quote', $id, $status);
@@ -156,8 +156,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $existingInv = $pdo->prepare("SELECT id FROM invoices WHERE quote_id=?"); $existingInv->execute([$id]);
             if (!$existingInv->fetchColumn()) {
                 $fno = next_number('F', 'invoices', 'invoice_no');
-                $pdo->prepare("INSERT INTO invoices (invoice_no, customer_id, quote_id, status, issue_date, due_date, subtotal, vat, rot_deduction, total) VALUES (?,?,?,'draft',date('now'),date('now','+30 days'),?,?,?,?)")
-                    ->execute([$fno, $custId, $id, $quote['subtotal'], $quote['vat'], $quote['rot_deduction'], $quote['total']]);
+                $issueDate = date('Y-m-d');
+                $dueDate = date('Y-m-d', strtotime('+30 days'));
+                $pdo->prepare("INSERT INTO invoices (invoice_no, customer_id, quote_id, status, issue_date, due_date, subtotal, vat, rot_deduction, total) VALUES (?,?,?,'draft',?,?,?,?,?,?)")
+                    ->execute([$fno, $custId, $id, $issueDate, $dueDate, $quote['subtotal'], $quote['vat'], $quote['rot_deduction'], $quote['total']]);
                 $invId = $pdo->lastInsertId();
                 // copy items
                 $qi = $pdo->prepare("SELECT * FROM quote_items WHERE quote_id=?"); $qi->execute([$id]);
@@ -322,7 +324,7 @@ require_once __DIR__ . '/includes/crm-header.php';
 
     <div class="card card--pad">
       <div class="fg"><label>Villkor / Anteckningar</label>
-        <textarea class="fta" name="notes" placeholder="T.ex. Fast pris. 5 år garanti ingår. Vi hanterar ROT-ansökan."><?= e($quote['notes'] ?? "Fast pris – prisgaranti ingår.\n5 år garanti på allt arbete.\nVi hanterar ROT-ansökan till Skatteverket.") ?></textarea>
+        <textarea class="fta" name="notes" placeholder="T.ex. Fast pris. Vi hanterar ROT-ansökan."><?= e($quote['notes'] ?? "Fast pris – prisgaranti ingår.\nVi hanterar ROT-ansökan till Skatteverket.") ?></textarea>
       </div>
       <button class="btn btn--primary" style="width:100%;justify-content:center">
         <?= $quote ? 'Spara ändringar' : 'Skapa offert' ?>

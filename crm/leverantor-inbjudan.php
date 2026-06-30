@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $token   = bin2hex(random_bytes(24));
         $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
-        db()->prepare("UPDATE supplier_invites SET used_at = datetime('now') WHERE supplier_id = ? AND used_at IS NULL")
+        db()->prepare("UPDATE supplier_invites SET used_at = " . now_expr() . " WHERE supplier_id = ? AND used_at IS NULL")
             ->execute([$sid]);
         db()->prepare("INSERT INTO supplier_invites (supplier_id, token, email, expires_at) VALUES (?,?,?,?)")
             ->execute([$sid, $token, $email, $expires]);

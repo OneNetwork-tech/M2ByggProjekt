@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare("UPDATE reviews SET reply_body = NULL, reply_at = NULL WHERE id=?")->execute([$id]);
             flash('Svaret togs bort.');
         } else {
-            $pdo->prepare("UPDATE reviews SET reply_body = ?, reply_at = datetime('now','localtime') WHERE id=?")->execute([$body, $id]);
+            $pdo->prepare("UPDATE reviews SET reply_body = ?, reply_at = " . now_expr() . " WHERE id=?")->execute([$body, $id]);
             audit('review_reply', 'review', $id);
             flash('Svar publicerat.');
         }

@@ -50,7 +50,7 @@ function portal_login(string $email, string $password): bool {
     $pu = $s->fetch();
     if (!$pu || !password_verify($password, $pu['password_hash'])) return false;
     $_SESSION['portal_user_id'] = $pu['id'];
-    db()->prepare("UPDATE portal_users SET last_login = datetime('now','localtime') WHERE id = ?")
+    db()->prepare("UPDATE portal_users SET last_login = " . now_expr() . " WHERE id = ?")
        ->execute([$pu['id']]);
     return true;
 }
@@ -89,7 +89,7 @@ function portal_validate_invite(string $token): ?array {
     $s = db()->prepare(
         "SELECT pi.*, c.name, c.email AS c_email
          FROM portal_invites pi JOIN customers c ON c.id = pi.customer_id
-         WHERE pi.token = ? AND pi.used_at IS NULL AND pi.expires_at > datetime('now','localtime')"
+         WHERE pi.token = ? AND pi.used_at IS NULL AND pi.expires_at > " . now_expr() . ""
     );
     $s->execute([$token]);
     return $s->fetch() ?: null;
